@@ -1,0 +1,133 @@
+SET search_path TO "iot-on-earth-public";
+
+-- DROP TABLE variationseries CASCADE;
+-- DROP TABLE variations CASCADE;
+-- DROP TABLE toggles CASCADE;
+-- DROP TABLE parametertables CASCADE;
+-- DROP TABLE gauges CASCADE;
+-- DROP TABLE widgets CASCADE;
+-- DROP TABLE datatables CASCADE;
+-- DROP TABLE constraintsofcolumn CASCADE;
+-- DROP TABLE columnconstraints CASCADE;
+-- DROP TABLE columndatatypes CASCADE;
+-- DROP TABLE columns CASCADE;
+-- DROP TABLE devices CASCADE;
+-- DROP TABLE projects CASCADE;
+-- DROP TABLE users CASCADE;
+
+CREATE TABLE users (
+    user_id   SERIAL PRIMARY KEY,
+    email    VARCHAR(50) NOT NULL,
+    user_name     VARCHAR(50) NOT NULL,
+	create_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE projects(
+	project_id SERIAL PRIMARY KEY,
+	project_name VARCHAR(50) NOT NULL,
+	description VARCHAR(200),
+	fingerprint VARCHAR(40),
+	user_id INTEGER REFERENCES users(user_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+	create_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+create table devices(
+	device_id SERIAL PRIMARY KEY,
+	device_name VARCHAR(50) NOT NULL,
+	device_description VARCHAR(50),
+	project_id INTEGER REFERENCES projects(project_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+	create_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+create table dataTables(
+	tbl_id SERIAL PRIMARY KEY,
+	tbl_name VARCHAR(15) NOT NULL,
+	project_id INTEGER REFERENCES projects(project_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+	create_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+create table columnDataTypes(
+	type_id SERIAL PRIMARY KEY,
+	type_name VARCHAR(10) NOT NULL,
+	create_time  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+create table columnConstraints(
+	constraint_id SERIAL PRIMARY KEY,
+	constraint_name VARCHAR(10) NOT NULL,
+	create_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+create table columns(
+	clm_id SERIAL PRIMARY KEY,
+	clm_name VARCHAR(10) NOT NULL,
+	data_type INTEGER REFERENCES columnDataTypes(type_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+	tbl_id INTEGER REFERENCES dataTables(tbl_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+	create_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+create table constraintsOfColumn(
+	id SERIAL PRIMARY KEY,
+	clm_id INTEGER REFERENCES columns(clm_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+	constraint_id INTEGER REFERENCES columnConstraints(constraint_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+	create_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+create table widgets(
+	widget_id SERIAL PRIMARY KEY,
+	dataset INTEGER REFERENCES dataTables(tbl_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+	create_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+	
+create table toggles(
+	id SERIAL PRIMARY KEY,
+	widget_id INTEGER REFERENCES widgets(widget_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+	clm_id INTEGER REFERENCES columns(clm_id) ON DELETE CASCADE ON UPDATE CASCADE,
+	write_enabled BOOLEAN,
+	create_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+	
+CREATE TABLE gauges(
+	id SERIAL PRIMARY KEY,
+	widget_id INTEGER REFERENCES widgets(widget_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+	clm_id INTEGER REFERENCES columns(clm_id) ON DELETE CASCADE ON UPDATE CASCADE,
+	max_value DOUBLE PRECISION NOT NULL,
+	gauge_type INTEGER NOT NULL,
+	create_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+	
+create table parameterTables(
+	id SERIAL PRIMARY KEY,
+	widget_id INTEGER REFERENCES widgets(widget_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+	clm_id INTEGER REFERENCES columns(clm_id) ON DELETE CASCADE ON UPDATE CASCADE,
+	create_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+create table variations(
+	id SERIAL PRIMARY KEY,
+	widget_id INTEGER REFERENCES widgets(widget_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+	x_axis INTEGER REFERENCES columns(clm_id) ON DELETE CASCADE ON UPDATE CASCADE,
+	variation_type INTEGER NOT NULL,
+	create_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+	
+create table variationSeries(
+	id SERIAL PRIMARY KEY,
+	variation_id INTEGER REFERENCES variations(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+	clm_id INTEGER REFERENCES columns(clm_id) ON DELETE CASCADE ON UPDATE CASCADE,
+	create_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
