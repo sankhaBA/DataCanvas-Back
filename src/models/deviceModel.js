@@ -37,6 +37,12 @@ Device.init({
     timestamps: true,
     underscored: true
 }
-   
 );
+
+Device.belongsTo(Project,{
+    foreignKey: 'project_id',
+    as: 'project',
+});
+   
+
 module.exports = Device;
