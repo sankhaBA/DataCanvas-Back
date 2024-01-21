@@ -38,4 +38,5 @@ Device.init({
     underscored: true
 }
    
-)
+);
+module.exports = Device;
