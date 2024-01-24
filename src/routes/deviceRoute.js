@@ -53,13 +53,12 @@ router.post('/', (req, res) => {
     }
 });
 
-// PUT request for /api/device/:deviceId, and update the device with the required deviceId
-router.put('/:deviceId', (req, res) => {
-    const deviceId = req.params.deviceId;
-    const { device_name, description } = req.body;
+// PUT request for /api/device/, and update the device with the required deviceId
+router.put('/', (req, res) => {
+    const { device_name, description, device_id } = req.body;
 
     try {
-        if (!deviceId || !device_name) {
+        if (!device_id || !device_name) {
             res.status(400).json({ message: 'Bad Request' });
         } else {
             DeviceController.updateDevice(deviceId, device_name, description, res);
@@ -70,13 +69,13 @@ router.put('/:deviceId', (req, res) => {
     }
 });
 
-// DELETE request for /api/device/:deviceId, and delete the device with the required deviceId
-router.delete('/:deviceId', (req, res) => {
-    const deviceId = req.params.deviceId;
+// DELETE request for /api/device/, and delete the device with the required deviceId
+router.delete('/', (req, res) => {
+    const device_id = req.params.device_id;
 
     try {
-        if (deviceId) {  // if deviceId parameter is available
-            DeviceController.deleteDevice(deviceId, res);
+        if (device_id) {  // if deviceId parameter is available
+            DeviceController.deleteDevice(device_id, res);
         } else {  // If deviceId parameter is not available     
             console.log("no deviceId");
             res.status(400).json({ message: 'Bad Request' });

@@ -53,12 +53,11 @@ router.post('/', (req, res) => {
 });
 
 // PUT request for /api/project/:projectId, and update the project with the required projectId
-router.put('/:projectId', (req, res) => {
-    const projectId = req.params.projectId;
-    const { project_name } = req.body;
+router.put('/', (req, res) => {
+    const { project_name, project_id } = req.body;
 
     try {
-        if (projectId && project_name && project_name != "") {  // if projectId parameter is available
+        if (project_id && project_name && project_name != "") {  // if projectId parameter is available
             ProjectController.updateProjectById(req, res);
         } else { // if projectId parameter is not available
             console.log("no projectId");
@@ -70,13 +69,13 @@ router.put('/:projectId', (req, res) => {
     }
 });
 
-// DELETE request for /api/project/:projectId, and delete the project with the required projectId
-router.delete('/:projectId', (req, res) => {
-    const projectId = req.params.projectId;
+// DELETE request for /api/project/, and delete the project with the required projectId
+router.delete('/', (req, res) => {
+    const project_id = req.body.project_id;
 
     try {
-        if (projectId) {  // if projectId parameter is available, send project details related to that projectId
-            ProjectController.deleteProjectById(projectId, res);
+        if (project_id) {  // if projectId parameter is available, send project details related to that projectId
+            ProjectController.deleteProjectById(project_id, res);
         } else {
             console.log("no projectId");
             res.status(400).json({ message: 'Bad Request' });
