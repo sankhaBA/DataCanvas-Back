@@ -15,7 +15,7 @@ async function getProjectsByUserId(user_id, res) {
         }
     } catch (error) {
         console.error('Error getting projects by user_id:', error);
-        res.status(500).json({ error: 'Failed to get projects by user_id' });
+        res.status(500).json({ error: 'Failed to get projects by user' });
     }
 }
 
