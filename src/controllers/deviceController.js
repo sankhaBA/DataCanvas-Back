@@ -22,7 +22,7 @@ async function addDevice(req, res) {
     let fingerprint = await generateFingerprint();
 
     try {
-        let device = await Device.create({ device_name, description, fingerprint });
+        let device = await Device.create({ device_name, description, fingerprint, project_id });
         res.status(200).json(device);
     } catch (error) {
         console.error('Error adding device:', error);
@@ -81,7 +81,7 @@ async function updateDeviceById( req, res) {
     const { device_id, device_name, description } = req.body;
 
     try {
-        let updatedRowCount = await Device.findOne({ device_name, description }, { where: { device_id } });
+        let updatedRowCount = await Device.update({ device_name, description }, { where: { device_id } });
         if (updatedRowCount > 0) {
             res.status(200).json({message: "Device updated successfully"});
         }

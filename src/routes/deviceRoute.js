@@ -96,7 +96,7 @@ router.delete('/', (req, res) => {
 
     try {
         if (device_id) {  // if deviceId parameter is available
-            DeviceController.deleteDevice(device_id, res);
+            DeviceController.deleteDeviceById(device_id, res);
         } else {  // If deviceId parameter is not available     
             console.log("no deviceId");
             res.status(400).json({ message: 'Bad Request' });
