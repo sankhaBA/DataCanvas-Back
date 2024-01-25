@@ -25,7 +25,7 @@ router.get('/:deviceId', (req, res) => {
     const deviceId = req.params.deviceId;
 
     try {
-        if (deviceId) {  // if deviceId parameter is available
+        if (deviceId && !isNaN(deviceId)) {  // if deviceId parameter is available
             DeviceController.getDeviceById(deviceId, res);
         } else {  // If deviceId parameter is not available
             console.log("no deviceId");
@@ -92,7 +92,7 @@ router.put('/', (req, res) => {
 
 // DELETE request for /api/device/, and delete the device with the required deviceId
 router.delete('/', (req, res) => {
-    const device_id = req.params.device_id;
+    const device_id = req.body.device_id;
 
     try {
         if (device_id) {  // if deviceId parameter is available

@@ -21,7 +21,13 @@ async function addDevice(req, res) {
 
     let fingerprint = await generateFingerprint();
 
+    if(!fingerprint){
+        res.status(500).json({ error: 'Failed to generate fingerprint' });
+        return;
+    }
+
     try {
+        console.log("fingerprint: ", fingerprint);
         let device = await Device.create({ device_name, description, fingerprint, project_id });
         res.status(200).json(device);
     } catch (error) {
@@ -119,7 +125,14 @@ async function generateFingerprint() {
         for (let i = 0; i < 32; i++) {
             fingerprint += characters.charAt(Math.floor(Math.random() * characters.length));
         }
-        deviceWithSameFingerprint = await Device.findOne({ fingerprint });
+
+        try{
+            deviceWithSameFingerprint = await Device.findOne({ where: { fingerprint } });
+        } catch (error) {
+            console.error('Error checking fingerprint:', error);
+            return false;
+        }
+        
     } while (deviceWithSameFingerprint);
 
     return fingerprint;

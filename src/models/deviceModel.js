@@ -1,48 +1,52 @@
-const {DataTypes,Model} = require('sequelize');
-const sequelize = require ('./../../db');
+const { DataTypes, Model } = require('sequelize');
+const sequelize = require('./../../db');
 const Project = require('./projectModel');
 
-class Device extends Model{}
+class Device extends Model { }
 
 Device.init({
-    device_id:{
+    device_id: {
         type: DataTypes.INTEGER,
-        allowNull:false,
+        allowNull: false,
         primaryKey: true,
-        AutoIncrement: true
+        autoIncrement: true
     },
 
-    device_name:{
+    device_name: {
         type: DataTypes.STRING,
         allowNull: false,
     },
 
-    fingerprint:{
+    description: {
         type: DataTypes.STRING,
-        allowNull:false
+    },
+
+    fingerprint: {
+        type: DataTypes.STRING,
+        allowNull: false
     },
 
     project_id: {
         type: DataTypes.INTEGER,
-        References:{
-            Model:Project,
+        References: {
+            Model: Project,
             key: 'project_id'
         }
     }
-},{
+}, {
     sequelize,
     modelName: 'Device',
     schema: 'iot-on-earth-public',
-    tableName: 'device',
+    tableName: 'devices',
     timestamps: true,
     underscored: true
 }
 );
 
-Device.belongsTo(Project,{
+Device.belongsTo(Project, {
     foreignKey: 'project_id',
     as: 'project',
 });
-   
+
 
 module.exports = Device;

@@ -25,7 +25,7 @@ router.get('/:projectId', (req, res) => {
     const projectId = req.params.projectId;
 
     try {
-        if (projectId) {  // if projectId parameter is available, send project details related to that projectId
+        if (projectId && !isNaN(projectId)) {  // if projectId parameter is available, send project details related to that projectId
             ProjectController.getProjectById(projectId, res);
         } else {  // If projectId parameter is not available, send all projects
             console.log("no projectId");
