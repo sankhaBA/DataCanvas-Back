@@ -6,16 +6,21 @@ require('dotenv').config();
 
 async function getProjectsByUserId(user_id, res) {
     try {
+        // Check if user exists
+        let user = await User.findOne({ where: { user_id } });
+
+        if (!user) {
+            res.status(404).json({ message: "User not found" });
+            return;
+        }
+
         let projects = await Project.findAll({ where: { user_id } });
 
-        if (projects.length > 0) {
-            res.status(200).json(projects);
-        } else {
-            res.status(404).json({ message: "Projects not found" });
-        }
+        res.status(200).json(projects);
+
     } catch (error) {
         console.error('Error getting projects by user_id:', error);
-        res.status(500).json({ error: 'Failed to get projects by user_id' });
+        res.status(500).json({ error: 'Failed to get projects by user' });
     }
 }
 
