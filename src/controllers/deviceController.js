@@ -3,7 +3,7 @@ const Project = require('../models/projectModel');
 require('dotenv').config();
 
 async function addDevice(req, res) {
-    const { device_name, project_id,description } = req.body;
+    const { device_name, project_id, description } = req.body;
 
     try {
         let project = await Project.findOne({ where: { project_id } });
@@ -21,7 +21,7 @@ async function addDevice(req, res) {
 
     let fingerprint = await generateFingerprint();
 
-    if(!fingerprint){
+    if (!fingerprint) {
         res.status(500).json({ error: 'Failed to generate fingerprint' });
         return;
     }
@@ -38,13 +38,18 @@ async function addDevice(req, res) {
 
 async function getDevicesByProjectId(project_id, res) {
     try {
+        // Check if project exists
+        let project = await Project.findOne({ where: { project_id } });
+
+        if (!project) {
+            res.status(404).json({ message: "Project not found" });
+            return;
+        }
+
         let devices = await Device.findAll({ where: { project_id } });
 
-        if (devices.length > 0) {
-            res.status(200).json(devices);
-        } else {
-            res.status(404).json({ message: "Devices not found" });
-        }
+        res.status(200).json(devices);
+
     } catch (error) {
         console.error('Error getting devices by project Id:', error);
         res.status(500).json({ error: 'Failed to get devices by project Id' });
@@ -83,13 +88,13 @@ async function getDeviceByFingerprint(fingerprint, res) {
     }
 }
 
-async function updateDeviceById( req, res) {
+async function updateDeviceById(req, res) {
     const { device_id, device_name, description } = req.body;
 
     try {
         let updatedRowCount = await Device.update({ device_name, description }, { where: { device_id } });
         if (updatedRowCount > 0) {
-            res.status(200).json({message: "Device updated successfully"});
+            res.status(200).json({ message: "Device updated successfully" });
         }
         else {
             res.status(404).json({ message: "Device not found" });
@@ -126,13 +131,13 @@ async function generateFingerprint() {
             fingerprint += characters.charAt(Math.floor(Math.random() * characters.length));
         }
 
-        try{
+        try {
             deviceWithSameFingerprint = await Device.findOne({ where: { fingerprint } });
         } catch (error) {
             console.error('Error checking fingerprint:', error);
             return false;
         }
-        
+
     } while (deviceWithSameFingerprint);
 
     return fingerprint;
