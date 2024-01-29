@@ -1,14 +1,14 @@
 const { DataTypes, Model } = require('sequelize');
 const sequelize = require('../../db');
 const Column = require('./columnModel');
-const Constraint = require('./ConstraintModel');
+const Constraint = require('./constraintModel');
 
 
 // Model for Constraint management with columns id and clm_id, constraint_id. clm_id and constraint_id are referenced from columnModel and ConstraintModel models imported above
 
-class Constraint extends Model { }
+class ColumnConstraint extends Model { }
 
-Constraint.init({
+ColumnConstraint.init({
 
     id: {
         type: DataTypes.INTEGER,
@@ -34,9 +34,9 @@ Constraint.init({
     }
 }, {
     sequelize,
-    modelName: 'Constraint',
+    modelName: 'ColumnConstraint',
     schema: 'iot-on-earth-public',
-    tableName: 'constraints',
+    tableName: 'columnconstraint',
     timestamps: true,
     underscored: true
 
@@ -49,9 +49,9 @@ Constraint.belongsTo(Column, {
     as: 'column',
 });
 
-Constraint.belongsTo(ColumnConstraint, {
+Constraint.belongsTo(Constraint, {
     foreignKey: 'constraint_id',
-    as: 'columnConstraint',
+    as: 'constraint',
 });
 
-module.exports = Constraint;
+module.exports = ColumnConstraint;

@@ -29,7 +29,7 @@ DataTable.init({
     sequelize,
     modelName: 'DataTable',
     schema: 'iot-on-earth-public',
-    tableName: 'data_tables',
+    tableName: 'datatables',
     timestamps: true,
     underscored: true
 }

@@ -3,9 +3,9 @@ const sequelize = require('../../db');
 
 
 
-class ColumnConstraint extends Model { }
+class Constraint extends Model { }
 
-ColumnConstraint.init({
+Constraint.init({
     
         constraint_id: {
             type: DataTypes.INTEGER,
@@ -20,12 +20,12 @@ ColumnConstraint.init({
         }
     }, {
         sequelize,
-        modelName: 'ColumnConstraint',
+        modelName: 'Constraint',
         schema: 'iot-on-earth-public',
-        tableName: 'column_constraints',
+        tableName: 'constraint',
         underscored: true
     
     }
     );
     
-module.exports = ColumnConstraint;
+module.exports = Constraint;
