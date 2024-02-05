@@ -3,7 +3,7 @@ const Project = require('../models/projectModel');
 require('dotenv').config();
 
 async function createTable(req,res) {
-    const {tbl_name,project_id,user_id} = req.body;
+    const {tbl_name,project_id,} = req.body;
 
     try {
         let project = await Project.findOne({ where: { project_id } });
@@ -64,16 +64,16 @@ async function getTableById(tbl_id,res){
         console.error('Error getting table by id:', error);
         res.status(500).json({ error: 'Failed to get table by id' });
     }
+
+    
 }
 
 async function updateTable(req,res){
     const {tbl_name,tbl_id}=req.body;
     try{
-        let table =await Table.findOne ({ where: { tbl_id}});
-        if(table){
-            table.tbl_name=tbl_name;
-            table.save();
-            res.status(200).json(table);
+        let updatedTable=await Table.update({tbl_name},{where: {device_id}});
+        if(updateTable>0){
+            res.status(200).json({ message: "Table updated successfully"});
         }
         else{
             res.status(404).json({ message: "Table not found" });
@@ -84,24 +84,26 @@ async function updateTable(req,res){
         res.status(500).json({ error: 'Failed to update table'});
 
     }
+}
 
+async function truncateTable(req,res){
+    
 }
 
 async function deleteTable(tbl_id,res){
-    try{
-        let table= await Table.findOne ({where: {tbl_id}});
-        if(table){
-            table.destroy();
-            res.status(200).json( {message: "Table deleted successfully"});
+    const deletedTable = await Table.destroy({ where: { tbl_id } });
+    try {
+        if (deletedTable > 0) {
+            res.status(200).json({ message: "Table deleted successfully" });
+        } else {
+            res.status(404).json({ message: "Table not found" });
+        }
+    } catch (error) {
+        console.error('Error deleting table:', error);
+        res.status(500).json({ error: 'Failed to delete table' });
+    }
 
-        }
-        else{
-            res.status(404).json({message: "Table not found"});
-        }
-    }
-    catch(error) {
-        console.error('Error deleting table:',error);
-        res.status(500).json({error: 'Failed to delete table'});
-    }
+
+   
 }
 
