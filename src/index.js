@@ -1,5 +1,5 @@
 const app = require('./app');
-const verifyToken = require('./middlewares/verifyJWT');
+//const verifyToken = require('./middlewares/verifyJWT');
 
 // Routes
 const userRoute = require('./routes/userRoute');
