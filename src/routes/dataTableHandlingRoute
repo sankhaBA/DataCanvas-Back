@@ -66,11 +66,29 @@ router.put('update',(req,res) =>{
     }
 });
 
+router.post('truncate/:tbl_id',(req,res)=>{
+    const tbl_id = req.params.tbl_id;
+    try{
+        if(tbl_id){
+            DataTableHandlingController.truncateTable(tbl_id,res);
+
+        }
+
+        else{
+            res.status(400).json({ message: 'Bad Request'});
+
+        }
+    }
+    catch{
+        console.error('Error truncating table',error);
+        res.status(500).json({ error: 'Failed to truncate table'})
+    }
+});
 
 router.delete('/delete/:tableId', (req, res) => {
-    const tbl_id = req.params.tableId;
+    const tbl_id = req.body.tbl_id;
     try{
-        if (tableId) {
+        if (tbl_id) {
             DataTableHandlingController.deleteTable(tbl_id,res);
         }
         else {
