@@ -93,7 +93,7 @@ async function truncateTable(req,res){
         if(!table){
             res.status(404).json({ message: "Table not found"})
         }
-        await Table.destroy({ where: {tbl_id},truncate: true})
+        await Table.destroy({ truncate: true})
         res.status(200).json({message: " Table truncated successfully"})
     }
     catch{
