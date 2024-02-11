@@ -29,7 +29,7 @@ async function createTable(req,res) {
 
 }
 
-async function getTablesByProjectId (project_id,user_id,res){
+async function getTablesByProjectId (project_id,res){
     try {
         // Check if project exists
         let project = await Project.findOne({ where: { project_id } });
@@ -71,7 +71,7 @@ async function getTableById(tbl_id,res){
 async function updateTable(req,res){
     const {tbl_name,tbl_id}=req.body;
     try{
-        let updatedTable=await Table.update({tbl_id},{where: {device_id}});
+        let updatedTable=await Table.update({tbl_id},{where: {tbl_id}});
         if(updateTable>0){
             res.status(200).json({ message: "Table updated successfully"});
         }

@@ -5,7 +5,7 @@ const DataTableHandlingController = require('../controllers/dataTableHandlingCon
 router.post('/create', (req, res) => {
 
     try {
-        if (!req.body.tbl_name || !req.body.project_id || !req.body.user_id ) {
+        if (!req.body.tbl_name || !req.body.project_id ) {
             res.status(400).json({ message: 'Bad Request' });
         } else {
             DataTableHandlingController.createTable(req, res);
@@ -19,10 +19,9 @@ router.post('/create', (req, res) => {
 
 router.get('/get', (req, res) => {
     const project_id = req.query.project_id;
-    const user_id = req.query.user_id;
     try{
         if (project_id && user_id) {
-            DataTableHandlingController.getTablesByProjectId(project_id, user_id,res);
+            DataTableHandlingController.getTablesByProjectId(project_id,res);
         }
         else {
             res.status(400).json({ message: 'Bad Request' });
