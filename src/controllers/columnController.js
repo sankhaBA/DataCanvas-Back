@@ -1,3 +1,4 @@
+const ColumnConstraint = require('../models/columnConstraintModel');
 const ColumnDataType = require('../models/columnDataTypeModel');
 const Column = require('../models/columnModel');
 const Table = require('../models/dataTableModel');
@@ -26,6 +27,14 @@ async function addColumn(req,res){
             tbl_id,
             default_value,
         });
+
+
+        // fetch associated column constraints  
+        const columnConstraints = await ColumnConstraint.findAll({
+          where: { clm_id: newColumn.clm_id },
+        });
+    
+        newColumn.setDataValue('columnConstraints', columnConstraints);
     
         res.status(201).json(newColumn);
     }
@@ -33,14 +42,21 @@ async function addColumn(req,res){
             console.error('Error creating column:', error);
             res.status(500).json({ error: 'Failed to create column' });
           }}
-//get columns by table id          
-async function getAllColumns(req, res) {
-  const {tbl_id} = req.params;
-    try {
+
+
+  //get columns by table id          
+  async function getAllColumns(req, res) {
+    const {tbl_id} = req.params;
+      try {
               const columns = await Column.findAll({
-                where: {tbl_id}, include:
-                res.status(200).json(columns)
+                where: {tbl_id}, include: [
+                  { model : Table},
+                  { model : ColumnDataType},
+                  { model : ColumnConstraint, as: 'columnConstraints'}
+                ]
+                
               });
+              res.status(200).json(columns);
           
         } catch (error) {
               console.error('Error getting all columns:', error);
@@ -48,11 +64,17 @@ async function getAllColumns(req, res) {
             }
     }
 
-//get columns by id    
-async function getColumnById(req,res){
-  const{id} = req.params;
-  try{
-    const coulmn = await Column.findByPk(id, { include: [Table,ColumnDataType]});
+  //get columns by id    
+  async function getColumnById(req,res){
+    const{id} = req.params;
+    try{
+        const column = await Column.findByPk(id, { 
+          include:[
+            Table, ColumnDataType, 
+            { model: ColumnConstraint, as: 'columnConstraints' }
+          ] });
+
+
     if (!coulmn){
       res.status(404).json({message: 'Column not found'});
       return;
@@ -64,18 +86,24 @@ async function getColumnById(req,res){
   }
 }
 
-//update the column by its ID
-async function updateColumnById(req,res){
-  const {id} = req.params;
-  const {clm_name,data_type,tbl_id,default_value} = req.body;
-  try {
-    const column = await Column.findByPk(id);
-    if (!column){
-      res.status(404).json({message:'Column not found'});
-      return
-    }
+  //update the column by its ID
+  async function updateColumnById(req,res){
+    const {id} = req.params;
+    const {clm_name,data_type,tbl_id,default_value} = req.body;
+    try {
+        const column = await Column.findByPk(id);
+        if (!column){
+          res.status(404).json({message:'Column not found'});
+          return
+        }
 
     await column.update({clm_name,data_type,tbl_id,default_value})
+
+    const columnConstraints = await ColumnConstraint.findAll({
+      where: { clm_id: column.clm_id },
+    });
+
+    column.setDataValue('columnConstraints', columnConstraints);
     res.status(200).json({message:'column updated successfully'});
 
   } catch (error) {
@@ -84,15 +112,16 @@ async function updateColumnById(req,res){
   }
 }
 
-async function deleteColumnById(req, res) {
-  const { id } = req.params;
+  //delete column
+  async function deleteColumnById(req, res) {
+    const { id } = req.params;
 
-  try {
-    const column = await Column.findByPk(id);
-    if (!column) {
-      res.status(404).json({ message: 'Column not found' });
-      return;
-    }
+      try {
+        const column = await Column.findByPk(id);
+        if (!column) {
+          res.status(404).json({ message: 'Column not found' });
+          return;
+      }
     await column.destroy();
     res.status(200).json({ message: 'Column deleted successfully' });
   } catch (error) {
