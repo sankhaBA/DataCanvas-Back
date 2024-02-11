@@ -20,7 +20,7 @@ router.post('/create', (req, res) => {
 router.get('/get', (req, res) => {
     const project_id = req.query.project_id;
     try{
-        if (project_id && user_id) {
+        if (project_id) {
             DataTableHandlingController.getTablesByProjectId(project_id,res);
         }
         else {
