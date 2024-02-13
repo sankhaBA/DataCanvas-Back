@@ -1,9 +1,9 @@
-const Table= require('../models/dataTableModel');
+const Table = require('../models/dataTableModel');
 const Project = require('../models/projectModel');
 require('dotenv').config();
 
-async function createTable(req,res) {
-    const {tbl_name,project_id,} = req.body;
+async function createTable(req, res) {
+    const { tbl_name, project_id, } = req.body;
 
     try {
         let project = await Project.findOne({ where: { project_id } });
@@ -25,11 +25,9 @@ async function createTable(req,res) {
         console.error('Error adding table:', error);
         res.status(500).json({ error: 'Failed to add table' });
     }
-
-
 }
 
-async function getTablesByProjectId (project_id,res){
+async function getTablesByProjectId(project_id, res) {
     try {
         // Check if project exists
         let project = await Project.findOne({ where: { project_id } });
@@ -49,62 +47,46 @@ async function getTablesByProjectId (project_id,res){
     }
 }
 
-async function getTableById(tbl_id,res){
+async function getTableById(tbl_id, res) {
     try {
-        let table = await Table.findOne( { where: { tbl_id}});
-        if( table){
-            res.status(200).json(table);        
+        let table = await Table.findOne({ where: { tbl_id } });
+        if (table) {
+            res.status(200).json(table);
         }
-        else{
+        else {
             res.status(404).json({ message: "Table not found" });
         }
-
     }
     catch (error) {
         console.error('Error getting table by id:', error);
         res.status(500).json({ error: 'Failed to get table by id' });
     }
-
-    
 }
 
-async function updateTable(req,res){
-    const {tbl_name,tbl_id}=req.body;
-    try{
-        let updatedTable=await Table.update({tbl_id},{where: {tbl_id}});
-        if(updateTable>0){
-            res.status(200).json({ message: "Table updated successfully"});
+async function updateTable(req, res) {
+    const { tbl_name, tbl_id } = req.body;
+    console.log(tbl_name, tbl_id);
+    try {
+        let updatedTable = await Table.update({ tbl_name }, { where: { tbl_id } });
+        if (updatedTable > 0) {
+            res.status(200).json({ message: "Table updated successfully" });
         }
-        else{
+        else {
             res.status(404).json({ message: "Table not found" });
         }
     }
     catch (error) {
         console.error('Error updating table:', error);
-        res.status(500).json({ error: 'Failed to update table'});
-
+        res.status(500).json({ error: 'Failed to update table' });
     }
 }
 
-async function truncateTable(req,res){
-    const {tbl_id}=req.body;
-    try{
-        const table=await Table.findOne({ where: {tbl_id}});
-        if(!table){
-            res.status(404).json({ message: "Table not found"})
-        }
-        await Table.destroy({ truncate: true})
-        res.status(200).json({message: " Table truncated successfully"})
-    }
-    catch{
-        console.error('Error truncating the table');
-        res.status(500).json({ error: 'Failed to truncate table' });
-    }
-
+async function truncateTable(req, res) {
+    res.status(200).json({ message: "Truncate table function not created yet" });
 }
 
 
-async function deleteTable(tbl_id,res){
+async function deleteTable(tbl_id, res) {
     const deletedTable = await Table.destroy({ where: { tbl_id } });
     try {
         if (deletedTable > 0) {
@@ -116,12 +98,9 @@ async function deleteTable(tbl_id,res){
         console.error('Error deleting table:', error);
         res.status(500).json({ error: 'Failed to delete table' });
     }
-
-
-   
 }
 
-module.exports ={
+module.exports = {
     createTable,
     getTablesByProjectId,
     getTableById,

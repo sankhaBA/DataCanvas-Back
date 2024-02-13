@@ -2,10 +2,10 @@ const express = require('express');
 const router = express.Router();
 const DataTableHandlingController = require('../controllers/dataTableHandlingController');
 
-router.post('/create', (req, res) => {
+router.post('/', (req, res) => {
 
     try {
-        if (!req.body.tbl_name || !req.body.project_id ) {
+        if (!req.body.tbl_name || !req.body.project_id) {
             res.status(400).json({ message: 'Bad Request' });
         } else {
             DataTableHandlingController.createTable(req, res);
@@ -17,11 +17,11 @@ router.post('/create', (req, res) => {
 }
 );
 
-router.get('/get', (req, res) => {
+router.get('/', (req, res) => {
     const project_id = req.query.project_id;
-    try{
+    try {
         if (project_id) {
-            DataTableHandlingController.getTablesByProjectId(project_id,res);
+            DataTableHandlingController.getTablesByProjectId(project_id, res);
         }
         else {
             res.status(400).json({ message: 'Bad Request' });
@@ -33,11 +33,11 @@ router.get('/get', (req, res) => {
 }
 );
 
-router.get('/get/:tableId', (req, res) => {
-    const tbl_id = req.params.tbl_id;
-    try{
+router.get('/:tableId', (req, res) => {
+    const tbl_id = req.params.tableId;
+    try {
         if (tbl_id) {
-            DataTableHandlingController.getTableById(tbl_id,res);
+            DataTableHandlingController.getTableById(tbl_id, res);
         }
         else {
             res.status(400).json({ message: 'Bad Request' });
@@ -47,14 +47,13 @@ router.get('/get/:tableId', (req, res) => {
         res.status(500).json({ error: 'Failed to get table' });
     }
 }
-
 );
 
-router.put('update',(req,res) =>{
-    const {tbl_name,tbl_id} = req.body;
-    try{
+router.put('/', (req, res) => {
+    const { tbl_name, tbl_id } = req.body;
+    try {
         if (tbl_id && tbl_name && tbl_name != "") {
-            DataTableHandlingController.updateTable(req,res);
+            DataTableHandlingController.updateTable(req, res);
         }
         else {
             res.status(400).json({ message: 'Bad Request' });
@@ -65,30 +64,26 @@ router.put('update',(req,res) =>{
     }
 });
 
-router.post('truncate/:tbl_id',(req,res)=>{
+router.post('truncate/:tbl_id', (req, res) => {
     const tbl_id = req.params.tbl_id;
-    try{
-        if(tbl_id){
-            DataTableHandlingController.truncateTable(tbl_id,res);
-
-        }
-
-        else{
-            res.status(400).json({ message: 'Bad Request'});
-
+    try {
+        if (tbl_id) {
+            DataTableHandlingController.truncateTable(tbl_id, res);
+        } else {
+            res.status(400).json({ message: 'Bad Request' });
         }
     }
-    catch{
-        console.error('Error truncating table',error);
-        res.status(500).json({ error: 'Failed to truncate table'})
+    catch {
+        console.error('Error truncating table', error);
+        res.status(500).json({ error: 'Failed to truncate table' })
     }
 });
 
-router.delete('/delete/:tableId', (req, res) => {
+router.delete('/', (req, res) => {
     const tbl_id = req.body.tbl_id;
-    try{
+    try {
         if (tbl_id) {
-            DataTableHandlingController.deleteTable(tbl_id,res);
+            DataTableHandlingController.deleteTable(tbl_id, res);
         }
         else {
             res.status(400).json({ message: 'Bad Request' });
