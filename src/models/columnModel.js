@@ -1,14 +1,13 @@
 const { DataTypes, Model } = require('sequelize');
 const sequelize = require('./../../db');
 const Table = require('./dataTableModel');
-const DataTable = require('./dataTableModel');
 const ColumnDataType = require('./columnDataTypeModel');
 
 // Model for column management with columns clm_id, clm_name, data_type, and tbl_id. tbl_id is referenced from dataTableModel model imported above
 
 class Column extends Model { }
 
-DataTable.init({
+Column.init({
 
     clm_id: {
         type: DataTypes.INTEGER,
