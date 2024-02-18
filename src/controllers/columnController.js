@@ -7,42 +7,50 @@ const Constraint = require('../models/constraintModel');
 require('dotenv').config();
 
 async function addColumn(req, res) {
-  const { clm_name, data_type, tbl_id, default_value } = req.body;
+  const { clm_name, data_type, tbl_id, default_value, max_length, constraints } = req.body;
 
   try {
-    //checking if the table exists
     const table = await Table.findByPk(tbl_id);
     if (!table) {
-      return res.status(404).json({ message: 'Table not found' })
+      res.status(404).json({ message: 'Table not found' });
+      return;
     }
 
-    //check if the referenced column data type exists
-    const columnDataType = await ColumnDataType.findByPk(data_type);
-    if (!columnDataType) {
-      return res.status(404).json({ message: 'Column data type not found' })
+    const column = await Column.create({ clm_name, data_type, tbl_id, default_value, max_length });
+
+    if (column) {
+      if (constraints) {
+        /*
+          CONSTRAINTS ARE IN THIS TYPE
+          constraints = [1,2,3] // array of constraint ids
+          These should be added to ColumnConstraint table along with clm_id
+        */
+        try {
+          for (let i = 0; i < constraints.length; i++) {
+            const constraint = await Constraint.findByPk(constraints[i]);
+            if (constraint) {
+              await ColumnConstraint.create({ clm_id: column.clm_id, constraint_id: constraint.constraint_id });
+            }
+          }
+        } catch (error) {
+          // Rollback the column creation and added column constraints
+          await column.destroy();
+          //Rollback column constraints added with the column ID
+          await ColumnConstraint.destroy({ where: { clm_id: column.clm_id } });
+          // Send error response
+          console.error('Error adding column constraints:', error);
+          res.status(500).json({ error: 'Failed to add column' });
+          return;
+        }
+      }
+
+      res.status(201).json(column);
+    } else {
+      res.status(500).json({ error: 'Failed to add column' });
     }
-
-    //create new coulmn
-    const newColumn = await Column.create({
-      clm_name,
-      data_type,
-      tbl_id,
-      default_value,
-    });
-
-
-    // fetch associated column constraints  
-    const columnConstraints = await ColumnConstraint.findAll({
-      where: { clm_id: newColumn.clm_id },
-    });
-
-    newColumn.setDataValue('columnConstraints', columnConstraints);
-
-    res.status(201).json(newColumn);
-  }
-  catch (error) {
-    console.error('Error creating column:', error);
-    res.status(500).json({ error: 'Failed to create column' });
+  } catch (error) {
+    console.error('Error adding column:', error);
+    res.status(500).json({ error: 'Failed to add column' });
   }
 }
 
