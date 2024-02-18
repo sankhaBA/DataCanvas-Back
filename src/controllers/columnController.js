@@ -3,7 +3,6 @@ const ColumnDataType = require('../models/columnDataTypeModel');
 const Column = require('../models/columnModel');
 const Table = require('../models/dataTableModel');
 const Constraint = require('../models/constraintModel');
-
 require('dotenv').config();
 
 async function addColumn(req, res) {
@@ -53,7 +52,6 @@ async function addColumn(req, res) {
     res.status(500).json({ error: 'Failed to add column' });
   }
 }
-
 
 //get columns by table id          
 async function getAllColumns(tbl_id, res) {
@@ -121,24 +119,52 @@ async function getColumnById(clm_id, res) {
 
 //update the column by its ID
 async function updateColumnById(req, res) {
-  const { id } = req.params;
-  const { clm_name, data_type, tbl_id, default_value } = req.body;
+  const { clm_id, clm_name, data_type, default_value, max_length, constraints } = req.body;
+
   try {
-    const column = await Column.findByPk(id);
+    const column = await Column.findByPk(clm_id);
     if (!column) {
       res.status(404).json({ message: 'Column not found' });
-      return
+      return;
     }
 
-    await column.update({ clm_name, data_type, tbl_id, default_value })
+    const updatedColumn = await column.update({ clm_name, data_type, default_value, max_length }, { where: { clm_id } });
 
-    const columnConstraints = await ColumnConstraint.findAll({
-      where: { clm_id: column.clm_id },
-    });
+    if (updatedColumn) {
+      // Get ids of rows of column constraint table with the clm_id
+      const oldColumnConstraints = await ColumnConstraint.findAll({ where: { clm_id } });
 
-    column.setDataValue('columnConstraints', columnConstraints);
-    res.status(200).json({ message: 'column updated successfully' });
+      // Remove all constraints related to this column
+      await ColumnConstraint.destroy({ where: { clm_id } });
 
+      if (constraints) {
+        try {
+          for (let i = 0; i < constraints.length; i++) {
+            const constraint = await Constraint.findByPk(constraints[i]);
+            if (constraint) {
+              await ColumnConstraint.create({ clm_id, constraint_id: constraint.constraint_id });
+            }
+          }
+        } catch (error) {
+          // Rollback the column update and added column constraints
+          await updatedColumn.update(column.dataValues);
+          //Rollback column constraints added with the column ID
+          await ColumnConstraint.destroy({ where: { clm_id } });
+          // Add back old constraints
+          for (let i = 0; i < oldColumnConstraints.length; i++) {
+            await ColumnConstraint.create({ clm_id, constraint_id: oldColumnConstraints[i].constraint_id });
+          }
+          // Send error response
+          console.error('Error adding column constraints:', error);
+          res.status(500).json({ error: 'Failed to update column' });
+          return;
+        }
+      }
+
+      res.status(200).json({ message: 'Column updated successfully' });
+    } else {
+      res.status(500).json({ error: 'Failed to update column' });
+    }
   } catch (error) {
     console.error('Error updating column by ID:', error);
     res.status(500).json({ error: 'Failed to update column' });
