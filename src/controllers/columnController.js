@@ -172,16 +172,17 @@ async function updateColumnById(req, res) {
 }
 
 //delete column
-async function deleteColumnById(req, res) {
-  const { id } = req.params;
-
+async function deleteColumnById(clm_id, res) {
   try {
-    const column = await Column.findByPk(id);
+    const column = await Column.findByPk(clm_id);
     if (!column) {
       res.status(404).json({ message: 'Column not found' });
       return;
     }
     await column.destroy();
+
+    // Column Constraints will be automatically deleted due to on_update cascade
+
     res.status(200).json({ message: 'Column deleted successfully' });
   } catch (error) {
     console.error('Error deleting column by ID:', error);

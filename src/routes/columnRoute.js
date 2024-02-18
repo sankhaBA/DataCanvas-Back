@@ -57,9 +57,9 @@ router.put('/', (req, res) => {
     const { clm_id } = req.body;
 
     try {
-        if (clm_id) {  // if tbl_id parameter is available, send column details related to that tbl_id
+        if (clm_id) {  // if clm_id parameter is available, send column details related to that tbl_id
             columnController.updateColumnById(req, res);
-        } else {  // If tbl_id parameter is not available, send all columns
+        } else {  // If clm_id parameter is not available, send all columns
             console.log("no clm_id");
             res.status(400).json({ message: 'Bad Request' });
         }
@@ -69,6 +69,20 @@ router.put('/', (req, res) => {
     }
 });
 
-// router.delete('/:', columnController.deleteColumnById);
+router.delete('/', (req, res) => {
+    const { clm_id } = req.body;
+
+    try {
+        if (clm_id) {  // if clm_id parameter is available, send column details related to that tbl_id
+            columnController.deleteColumnById(clm_id, res);
+        } else {  // If clm_id parameter is not available, send all columns
+            console.log("no clm_id");
+            res.status(400).json({ message: 'Bad Request' });
+        }
+    } catch (error) {
+        console.error('Error getting column:', error);
+        res.status(500).json({ message: 'Failed to get column' });
+    }
+});
 
 module.exports = router;
