@@ -5,7 +5,6 @@ const Constraint = require('./constraintModel');
 
 
 // Model for Constraint management with columns id and clm_id, constraint_id. clm_id and constraint_id are referenced from columnModel and ConstraintModel models imported above
-
 class ColumnConstraint extends Model { }
 
 ColumnConstraint.init({
@@ -39,19 +38,7 @@ ColumnConstraint.init({
     tableName: 'columnconstraint',
     timestamps: true,
     underscored: true
-
 }
 );
-
-
-Constraint.belongsTo(Column, {
-    foreignKey: 'clm_id',
-    as: 'column',
-});
-
-Constraint.belongsTo(Constraint, {
-    foreignKey: 'constraint_id',
-    as: 'constraint',
-});
 
 module.exports = ColumnConstraint;

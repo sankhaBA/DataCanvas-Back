@@ -1,14 +1,13 @@
 const { DataTypes, Model } = require('sequelize');
 const sequelize = require('./../../db');
 const Table = require('./dataTableModel');
-const DataTable = require('./dataTableModel');
 const ColumnDataType = require('./columnDataTypeModel');
 
 // Model for column management with columns clm_id, clm_name, data_type, and tbl_id. tbl_id is referenced from dataTableModel model imported above
 
 class Column extends Model { }
 
-DataTable.init({
+Column.init({
 
     clm_id: {
         type: DataTypes.INTEGER,
@@ -41,7 +40,12 @@ DataTable.init({
     default_value: {
         type: DataTypes.STRING,
         allowNull: true,
-    }
+    },
+
+    max_length: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+    },
 }, {
     sequelize,
     modelName: 'Column',
@@ -52,16 +56,6 @@ DataTable.init({
 
 }
 );
-
-Column.belongsTo(Table, {
-    foreignKey: 'tbl_id',
-    as: 'table',
-});
-
-Column.belongsTo(ColumnDataType, {
-    foreignKey: 'data_type',
-    as: 'columnDataType',
-});
 
 module.exports = Column;
 
