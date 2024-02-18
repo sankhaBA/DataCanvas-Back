@@ -40,7 +40,12 @@ Column.init({
     default_value: {
         type: DataTypes.STRING,
         allowNull: true,
-    }
+    },
+
+    max_length: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+    },
 }, {
     sequelize,
     modelName: 'Column',
@@ -51,16 +56,6 @@ Column.init({
 
 }
 );
-
-Column.belongsTo(Table, {
-    foreignKey: 'tbl_id',
-    as: 'table',
-});
-
-Column.belongsTo(ColumnDataType, {
-    foreignKey: 'data_type',
-    as: 'columnDataType',
-});
 
 module.exports = Column;
 

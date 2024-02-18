@@ -2,6 +2,8 @@ const ColumnConstraint = require('../models/columnConstraintModel');
 const ColumnDataType = require('../models/columnDataTypeModel');
 const Column = require('../models/columnModel');
 const Table = require('../models/dataTableModel');
+const Constraint = require('../models/constraintModel');
+
 require('dotenv').config();
 
 async function addColumn(req, res) {
@@ -47,13 +49,30 @@ async function addColumn(req, res) {
 
 //get columns by table id          
 async function getAllColumns(tbl_id, res) {
+  // Check for table existence
+  try {
+    const table = await Table.findByPk(tbl_id);
+    if (!table) {
+      res.status(404).json({ message: 'Table not found' });
+      return;
+    }
+  } catch (error) {
+    console.error('Error getting table by ID:', error);
+    res.status(500).json({ error: 'Failed to get table' });
+  }
 
   try {
     const columns = await Column.findAll({
-      where: { tbl_id }, include: [
-        { model: Table },
-        { model: ColumnDataType },
-        { model: ColumnConstraint, as: 'columnConstraints' }
+      where: { tbl_id },
+      attributes: {
+        exclude: ['createdAt', 'updatedAt'] // Exclude timestamp columns
+      },
+      include: [
+        {
+          model: ColumnConstraint,
+          as: 'constraints',
+          attributes: ['constraint_id'],
+        }
       ]
     });
     res.status(200).json(columns);

@@ -38,19 +38,7 @@ ColumnConstraint.init({
     tableName: 'columnconstraint',
     timestamps: true,
     underscored: true
-
 }
 );
-
-
-ColumnConstraint.belongsTo(Column, {
-    foreignKey: 'clm_id',
-    as: 'column',
-});
-
-ColumnConstraint.belongsTo(Constraint, {
-    foreignKey: 'constraint_id',
-    as: 'constraint',
-});
 
 module.exports = ColumnConstraint;

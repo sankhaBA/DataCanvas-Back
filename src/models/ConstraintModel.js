@@ -1,6 +1,7 @@
 const { DataTypes, Model } = require('sequelize');
 const sequelize = require('../../db'); // Import the Sequelize instance
 
+
 class Constraint extends Model { }
 
 Constraint.init({
@@ -22,7 +23,6 @@ Constraint.init({
     tableName: 'constraint',
     timestamps: false,
     underscored: true
-
 }
 );
 

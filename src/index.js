@@ -1,6 +1,9 @@
 const app = require('./app');
 const verifyToken = require('./middlewares/verifyJWT');
 
+// Import associations
+require('./associations/associations');
+
 // Routes
 const userRoute = require('./routes/userRoute');
 const authRoute = require('./routes/authRoute');
