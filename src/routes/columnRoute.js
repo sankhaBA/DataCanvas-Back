@@ -20,7 +20,22 @@ router.get('/', (req, res) => {
 
 });
 
-// router.get('/:id', columnController.getColumnById);
+router.get('/:clm_id', (req, res) => {
+    const clm_id = req.params.clm_id;
+
+    try {
+        if (clm_id) {  // if tbl_id parameter is available, send column details related to that tbl_id
+            columnController.getColumnById(clm_id, res);
+        } else {  // If tbl_id parameter is not available, send all columns
+            console.log("no clm_id");
+            res.status(400).json({ message: 'Bad Request' });
+        }
+    } catch (error) {
+        console.error('Error getting column:', error);
+        res.status(500).json({ message: 'Failed to get column' });
+    }
+
+});
 // router.post('/', columnController.createColumn);
 // router.put('/:', columnController.updateColumnById);
 // router.delete('/:', columnController.deleteColumnById);

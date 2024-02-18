@@ -84,25 +84,30 @@ async function getAllColumns(tbl_id, res) {
 }
 
 //get columns by id    
-async function getColumnById(req, res) {
-  const { id } = req.params;
+async function getColumnById(clm_id, res) {
   try {
-    const column = await Column.findByPk(id, {
+    const column = await Column.findByPk(clm_id, {
+      attributes: {
+        exclude: ['createdAt', 'updatedAt'] // Exclude timestamp columns
+      },
       include: [
-        Table, ColumnDataType,
-        { model: ColumnConstraint, as: 'columnConstraints' }
+        {
+          model: ColumnConstraint,
+          as: 'constraints',
+          attributes: ['constraint_id'],
+        }
       ]
     });
 
-
-    if (!coulmn) {
+    if (!column) {
       res.status(404).json({ message: 'Column not found' });
       return;
     }
-    res.status(200).json(coulmn);
+
+    res.status(200).json(column);
   } catch (error) {
-    console.error('error getting nby colun id:', error);
-    res.status(500).json({ error: 'failed to get column by ID' });
+    console.error('error getting column by id:', error);
+    res.status(500).json({ error: 'failed to get column' });
   }
 }
 
