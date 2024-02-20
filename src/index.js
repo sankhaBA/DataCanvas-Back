@@ -19,9 +19,9 @@ app.use('/api/user', userRoute);
 app.use('/api/auth', authRoute);
 app.use('/api/project', projectRoute);
 app.use('/api/device', verifyToken, deviceRoute);
-app.use('/api/data/tbl', dataTableHandlingRoute);
-app.use('/api/data/clm', columnRoute);
-app.use('/api/data/config', dataConfigRoute);
+app.use('/api/data/tbl', verifyToken, dataTableHandlingRoute);
+app.use('/api/data/clm', verifyToken, columnRoute);
+app.use('/api/data/config', verifyToken, dataConfigRoute);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
