@@ -94,6 +94,21 @@ router.delete('/', (req, res) => {
     }
 });
 
+router.delete('/all', (req,res) =>{
+    const project_id =req.body.project_id;
+    try{
+        if(project_id){
+            DataTableHandlingController.deleteAllTable(project_id,res);
+        }
+        else{
+            res.status(400).json({message:'Bad Request'});
+        }
+    }catch(error){
+        console.error('Error deleting tables', error);
+        res.status(500).json({error:'Failed to delete all tables'});
+    }
+});
+
 
 
 module.exports = router;
