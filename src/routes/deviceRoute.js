@@ -108,5 +108,23 @@ router.delete('/', (req, res) => {
 
 });
 
+// DELETE request for /api/device/all, and delete all devices with the required project_id
+router.delete('/all', (req,res)=>{
+
+    const project_id = req.body.project_id;
+
+    try{
+        if(project_id) {
+            DeviceController.deleteAllDevicesByProjectId(project_id,res);
+        }
+        else{
+            res.status(400).json({ message: 'Bad Request' });
+        }
+    } catch(error){
+        console.error('Error deleting all devices:', error);
+        res.status(500).json({ error: 'Failed to delete all devices' });
+    }
+})
+
 module.exports = router;
 

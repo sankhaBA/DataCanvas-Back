@@ -100,6 +100,20 @@ async function deleteTable(tbl_id, res) {
     }
 }
 
+async function deleteAllTable(project_id, res) {
+    const deletedTable = await Table.destroy({ where: { project_id } });
+    try {
+        if (deletedTable > 0) {
+            res.status(200).json({ message: "Table deleted successfully" });
+        } else {
+            res.status(404).json({ message: "Table not found" });
+        }
+    } catch (error) {
+        console.error('Error deleting tables:', error);
+        res.status(500).json({ error: 'Failed to delete all tables' });
+    }
+}
+
 module.exports = {
     createTable,
     getTablesByProjectId,
@@ -107,5 +121,6 @@ module.exports = {
     updateTable,
     truncateTable,
     deleteTable,
+    deleteAllTable,
 };
 
