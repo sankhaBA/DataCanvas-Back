@@ -64,7 +64,7 @@ router.put('/', (req, res) => {
     }
 });
 
-router.post('truncate/:tbl_id', (req, res) => {
+router.post('/truncate/:tbl_id', (req, res) => {
     const tbl_id = req.params.tbl_id;
     try {
         if (tbl_id) {
