@@ -105,8 +105,11 @@ async function updateDeviceById(req, res) {
     }
 }
 
+//delete device by device_id
+
 async function deleteDeviceById(device_id, res) {
     const deletedDevice = await Device.destroy({ where: { device_id } });
+
     try {
         if (deletedDevice > 0) {
             res.status(200).json({ message: "Device deleted successfully" });
@@ -116,6 +119,23 @@ async function deleteDeviceById(device_id, res) {
     } catch (error) {
         console.error('Error deleting device by id:', error);
         res.status(500).json({ error: 'Failed to delete device by id' });
+    }
+}
+
+//delete all devices by project_id
+async function deleteAllDevicesByProjectId(project_id,res){
+    const deletedDevice=await Device.destroy({where:{project_id}});
+
+    try{
+        if(deletedDevice>0){
+            res.status(200).json({message:"Devices deleted successfully"});
+        }
+        else{
+            res.status(404).json({message:"Devices not found"});
+        }
+    }catch(erroe){
+        console.error('Error deleting devices :',error);
+        res.status(500).json({error:'Failed to delete devices'})
     }
 }
 
@@ -151,4 +171,5 @@ module.exports = {
     getDeviceByFingerprint,
     updateDeviceById,
     deleteDeviceById,
+    deleteAllDevicesByProjectId,
 };
