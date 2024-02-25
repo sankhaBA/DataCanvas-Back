@@ -65,7 +65,7 @@ router.put('/', (req, res) => {
 });
 
 router.post('/truncate/:tbl_id', (req, res) => {
-    const tbl_id = req.params.tbl_id;
+    const tbl_id = req.body.tbl_id;
     try {
         if (tbl_id) {
             DataTableHandlingController.truncateTable(tbl_id, res);
@@ -94,18 +94,18 @@ router.delete('/', (req, res) => {
     }
 });
 
-router.delete('/all', (req,res) =>{
-    const project_id =req.body.project_id;
-    try{
-        if(project_id){
-            DataTableHandlingController.deleteAllTable(project_id,res);
+router.delete('/all', (req, res) => {
+    const project_id = req.body.project_id;
+    try {
+        if (project_id) {
+            DataTableHandlingController.deleteAllTable(project_id, res);
         }
-        else{
-            res.status(400).json({message:'Bad Request'});
+        else {
+            res.status(400).json({ message: 'Bad Request' });
         }
-    }catch(error){
+    } catch (error) {
         console.error('Error deleting tables', error);
-        res.status(500).json({error:'Failed to delete all tables'});
+        res.status(500).json({ error: 'Failed to delete all tables' });
     }
 });
 
