@@ -1,5 +1,8 @@
 const Table = require('../models/dataTableModel');
 const Project = require('../models/projectModel');
+const Column = require('../models/columnModel');
+const Constraint = require('../models/constraintModel');
+const ColumnConstraint = require('../models/columnConstraintModel');
 require('dotenv').config();
 
 async function createTable(req, res) {
@@ -20,6 +23,18 @@ async function createTable(req, res) {
 
     try {
         let table = await Table.create({ tbl_name, project_id });
+
+        const column_id = await Column.create({ clm_name:'id', data_type:1, tbl_id:table.tbl_id});
+        const column_device = await Column.create({ clm_name:'device', data_type:1, tbl_id:table.tbl_id, default_value:-1 });
+
+        let constraints = [1,4];
+        for (let i = 0; i < constraints.length; i++) {
+            const constraint = await Constraint.findByPk(constraints[i]);
+            if (constraint) {
+              await ColumnConstraint.create({ clm_id: column_id.clm_id, constraint_id: constraint.constraint_id });
+            }
+          }
+
         res.status(200).json(table);
     } catch (error) {
         console.error('Error adding table:', error);
