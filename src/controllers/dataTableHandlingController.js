@@ -20,6 +20,9 @@ async function createTable(req, res) {
 
     try {
         let table = await Table.create({ tbl_name, project_id });
+
+
+
         res.status(200).json(table);
     } catch (error) {
         console.error('Error adding table:', error);
