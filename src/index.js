@@ -12,6 +12,7 @@ const deviceRoute = require("./routes/deviceRoute");
 const dataConfigRoute = require("./routes/dataConfigRoute");
 const dataTableHandlingRoute = require("./routes/dataTableHandlingRoute");
 const columnRoute = require("./routes/columnRoute");
+const dataGatheringRoute = require("./routes/dataGatheringRoute");
 
 const PORT = process.env.PORT || 3001;
 
@@ -22,6 +23,7 @@ app.use("/api/device", verifyToken, deviceRoute);
 app.use("/api/data/tbl", verifyToken, dataTableHandlingRoute);
 app.use("/api/data/clm", verifyToken, columnRoute);
 app.use("/api/data/config", verifyToken, dataConfigRoute);
+app.use("/api/data/feed", dataGatheringRoute);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
