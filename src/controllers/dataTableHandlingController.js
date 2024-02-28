@@ -1,5 +1,6 @@
 const Table = require("../models/dataTableModel");
 const Project = require("../models/projectModel");
+const Devices = require("../models/deviceModel");
 const Column = require("../models/columnModel");
 const Constraint = require("../models/constraintModel");
 const ColumnConstraint = require("../models/columnConstraintModel");
@@ -175,10 +176,12 @@ async function createRelations(tbl_id) {
         device: {
           type: DataTypes.INTEGER,
           defaultValue: -1,
-          references: {
-            model: tableName,
-            key: "id",
-          },
+          // references: {
+          //   model: Devices,
+          //   key: "device_id",
+          //   onUpdate: 'CASCADE',
+          //   onDelete: 'CASCADE',
+          // },
         },
       },
       {
@@ -188,6 +191,13 @@ async function createRelations(tbl_id) {
         tableName: tableName,
       }
     );
+
+    table.belongsTo(Devices, {
+      foreignKey: `device`,
+      targetKey: "device_id",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    });
 
     // Synchronize table
     table.sync({ force: true });
