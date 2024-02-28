@@ -4,7 +4,7 @@ const Devices = require("../models/deviceModel");
 const Column = require("../models/columnModel");
 const Constraint = require("../models/constraintModel");
 const ColumnConstraint = require("../models/columnConstraintModel");
-const { DataTypes, Model } = require("sequelize");
+const { DataTypes, Model, Sequelize } = require("sequelize");
 const sequelize = require("./../../db");
 require("dotenv").config();
 
@@ -183,9 +183,19 @@ async function createRelations(tbl_id) {
           //   onDelete: 'CASCADE',
           // },
         },
+        created_at: {
+          type: DataTypes.DATE,
+          defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+        },
+        updated_at: {
+          type: DataTypes.DATE,
+          defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+        }
       },
       {
         timestamps: true,
+        createdAt: "created_at",
+        updatedAt: "updated_at",
         underscored: true,
         schema: "iot-on-earth-public",
         tableName: tableName,
@@ -200,7 +210,7 @@ async function createRelations(tbl_id) {
     });
 
     // Synchronize table
-    table.sync({ force: true });
+    await table.sync({ force: true });
 
     return true;
   } catch (error) {

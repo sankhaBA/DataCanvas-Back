@@ -1,7 +1,7 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
-const sequelize = new Sequelize('iot-on-earth', 'datacanvasAdmin','2215476LKRa', {
+const sequelize = new Sequelize('iot-on-earth', 'datacanvasAdmin', '2215476LKRa', {
   host: 'datacanvas-postgresql.postgres.database.azure.com',
   port: 5432,
   dialect: 'postgres',
