@@ -109,6 +109,12 @@ async function insertData(req, res) {
                 return;
             }
 
+            // Check max length of the value
+            if (foundColumn.max_length != null && foundColumn.dataType == 2 && !validateColumnMaxLength(foundColumn.max_length, data[column])) {
+                res.status(400).json({ error: `Max length of ${column} exceeded | CHECK data length` });
+                return;
+            }
+
             // Check if the column has constraint of NOT NULL
             let notNull = foundColumn.constraints.find((constraint) => { if (constraint.constraint_id == 2) { return true } else { return false } });
 
@@ -262,6 +268,14 @@ const validateColumnDataType = async (dataType, data) => {
         if (typeof data != 'string') {
             return false;
         }
+    }
+
+    return true;
+}
+
+const validateColumnMaxLength = async (maxLength, data) => {
+    if (data.length > maxLength) {
+        return false;
     }
 
     return true;

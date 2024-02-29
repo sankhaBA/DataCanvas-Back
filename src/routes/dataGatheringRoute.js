@@ -10,7 +10,7 @@ router.post('/insert', (req, res) => {
         if (validateFields(req.body)) {  // if project_id, fingerprint and table_id parameters are available, insert data
             DataGatheringController.insertData(req, res);
         } else {  // If project_id, fingerprint and table_id parameters are not available, send bad request
-            res.status(400).json({ error: 'Bad Request | CHECK project_id, fingerprint, table, data | Request validation unsuccessful' });
+            res.status(400).json({ error: 'Bad Request | CHECK project_id, fingerprint, table, data | id and device fields are automatically added | Request validation unsuccessful' });
         }
     } catch (error) {
         console.error('Error inserting data:', error);
@@ -48,6 +48,11 @@ const validateFields = (fields) => {
 
     // If data section do not have any json fields, return false
     if (Object.keys(data).length == 0) {
+        return false;
+    }
+
+    // Check if the data section has 'id' or 'device' section. If so, return false
+    if (data.id || data.device) {
         return false;
     }
 
