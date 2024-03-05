@@ -145,7 +145,7 @@ async function insertData(req, res) {
         let values = ` VALUES (${device_id}, `;
         // Loop through the data object and create the insert query
         for (let column in data) {
-            insertData += `${column}, `;
+            insertData += `${column},`;
             values += `'${data[column]}', `;
         }
 

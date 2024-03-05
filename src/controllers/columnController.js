@@ -3,6 +3,8 @@ const ColumnDataType = require('../models/columnDataTypeModel');
 const Column = require('../models/columnModel');
 const Table = require('../models/dataTableModel');
 const Constraint = require('../models/constraintModel');
+const { DataTypes, Model, Sequelize } = require("sequelize");
+const sequelize = require("./../../db");
 require('dotenv').config();
 
 async function addColumn(req, res) {
@@ -41,6 +43,62 @@ async function addColumn(req, res) {
           res.status(500).json({ error: 'Failed to add column' });
           return;
         }
+      }
+
+      /* 
+        If the column is created succesfully, datatable_<tbl_id> should be altered to add the new column
+      */
+
+      try {
+        let dataTypeString = '';
+        let constraintList = '';
+
+        // SET DATA TYPE
+        if (data_type == 1) {
+          dataTypeString = 'int';
+        } else if (data_type == 2) {
+          dataTypeString = 'double';
+        } else if (data_type == 3) {
+          dataTypeString = 'varchar';
+          if (max_length) {
+            dataTypeString += `(${max_length})`;
+          }
+        }
+
+        // SET CONSTRAINTS
+        for (let i = 0; i < constraints.length; i++) {
+          switch (constraints[i]) {
+            case 1:
+              constraintList += ' AUTO INCREMENT';
+              break;
+            case 2:
+              constraintList += ' NOT NULL';
+              break;
+            case 3:
+              constraintList += ' UNIQUE';
+              break;
+          }
+        }
+
+        let query = '';
+        if (default_value && default_value != null) {
+          query = `ALTER TABLE "iot-on-earth-public"."datatable_${tbl_id}" ADD COLUMN ${clm_name} ${dataTypeString} DEFAULT '${default_value}'${constraintList};`;
+        } else {
+          query = `ALTER TABLE "iot-on-earth-public"."datatable_${tbl_id}" ADD COLUMN ${clm_name} ${dataTypeString}${constraintList};`;
+        }
+
+
+        // Execute the query
+        const [results, metadata] = await sequelize.query(query);
+      } catch (error) {
+        // Rollback the column creation and added column constraints
+        await column.destroy();
+        //Rollback column constraints added with the column ID
+        await ColumnConstraint.destroy({ where: { clm_id: column.clm_id } });
+        // Send error response
+        console.error('Error adding column to datatable:', error);
+        res.status(500).json({ error: 'Failed to add column' });
+        return;
       }
 
       res.status(201).json(column);
