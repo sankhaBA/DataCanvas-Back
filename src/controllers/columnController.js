@@ -264,6 +264,21 @@ async function deleteColumnById(clm_id, res) {
 
     // Column Constraints will be automatically deleted due to on_update cascade
 
+    /*
+      If the column is deleted succesfully, datatable_<tbl_id> should be altered to remove the column
+    */
+    try {
+      let query = `ALTER TABLE "iot-on-earth-public"."datatable_${column.tbl_id}" DROP COLUMN ${column.clm_name};`;
+      const [results, metadata] = await sequelize.query(query);
+    } catch (error) {
+      // Rollback the column deletion
+      await Column.create({ clm_name: column.clm_name, data_type: column.data_type, tbl_id: column.tbl_id, default_value: column.default_value, max_length: column.max_length });
+      // Send error response
+      console.error('Error deleting column from datatable:', error);
+      res.status(500).json({ error: 'Failed to delete column' });
+      return;
+    }
+
     res.status(200).json({ message: 'Column deleted successfully' });
   } catch (error) {
     console.error('Error deleting column by ID:', error);
