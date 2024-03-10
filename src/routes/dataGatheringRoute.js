@@ -18,6 +18,22 @@ router.post('/insert', (req, res) => {
     }
 });
 
+// delete request to delete data
+router.delete('/delete', (req, res) => {
+    const { project_id, fingerprint, table } = req.body;
+
+    try {
+        if (validateFields(req.body)) {  // if project_id, fingerprint and table_id parameters are available, delete data
+            DataGatheringController.deleteData(req, res);
+        } else {  // If project_id, fingerprint and table_id parameters are not available, send bad request
+            res.status(400).json({ error: 'Bad Request | CHECK project_id, fingerprint, table, data | id and device fields are automatically added | Request validation unsuccessful' });
+        }
+    } catch (error) {
+        console.error('Error deleting data:', error);
+        res.status(500).json({ message: 'Failed to delete data' });
+    }
+});
+
 const validateFields = (fields) => {
     const { project_id, fingerprint, table, data } = fields;
 
