@@ -123,13 +123,36 @@ async function updateTable(req, res) {
 }
 
 async function truncateTable(req, res) {
-  res.status(200).json({ message: "Truncate table function not created yet" });
+  const { tbl_id } = req.body;
+
+  let sql = 'TRUNCATE TABLE datatable_' + tbl_id;
+
+  try {
+    let result = await sequelize.query(sql);
+
+    if (result) {
+      res.status(200).json({ message: "Table truncated successfully" });
+    }
+  } catch (error) {
+    console.error("Error truncating table:", error);
+    res.status(500).json({ error: "Failed to truncate table" });
+  }
+  
 }
 
 async function deleteTable(tbl_id, res) {
-  const deletedTable = await Table.destroy({ where: { tbl_id } });
+
   try {
+    const deletedTable = await Table.destroy({ where: { tbl_id } });
     if (deletedTable > 0) {
+      let sql = 'DROP TABLE datatable_' + tbl_id;
+      try{
+        let result = await sequelize.query(sql);
+      } catch (error) {
+        console.error("Error deleting table:", error);
+        res.status(202).json({ error: "Table deleted partially" });
+      }
+
       res.status(200).json({ message: "Table deleted successfully" });
     } else {
       res.status(404).json({ message: "Table not found" });
