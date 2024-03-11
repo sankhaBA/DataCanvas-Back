@@ -3,6 +3,8 @@ const ColumnDataType = require('../models/columnDataTypeModel');
 const Column = require('../models/columnModel');
 const Table = require('../models/dataTableModel');
 const Constraint = require('../models/constraintModel');
+const { DataTypes, Model, Sequelize, col } = require("sequelize");
+const sequelize = require("./../../db");
 require('dotenv').config();
 
 async function addColumn(req, res) {
@@ -41,6 +43,62 @@ async function addColumn(req, res) {
           res.status(500).json({ error: 'Failed to add column' });
           return;
         }
+      }
+
+      /* 
+        If the column is created succesfully, datatable_<tbl_id> should be altered to add the new column
+      */
+
+      try {
+        let dataTypeString = '';
+        let constraintList = '';
+
+        // SET DATA TYPE
+        if (data_type == 1) {
+          dataTypeString = 'int';
+        } else if (data_type == 2) {
+          dataTypeString = 'real';
+        } else if (data_type == 3) {
+          dataTypeString = 'varchar';
+          if (max_length) {
+            dataTypeString += `(${max_length})`;
+          }
+        }
+
+        // SET CONSTRAINTS
+        for (let i = 0; i < constraints.length; i++) {
+          switch (constraints[i]) {
+            case 1:
+              constraintList += ' AUTO INCREMENT';
+              break;
+            case 2:
+              constraintList += ' NOT NULL';
+              break;
+            case 3:
+              constraintList += ' UNIQUE';
+              break;
+          }
+        }
+
+        let query = '';
+        if (default_value && default_value != null) {
+          query = `ALTER TABLE "iot-on-earth-public"."datatable_${tbl_id}" ADD COLUMN ${clm_name} ${dataTypeString} DEFAULT '${default_value}'${constraintList};`;
+        } else {
+          query = `ALTER TABLE "iot-on-earth-public"."datatable_${tbl_id}" ADD COLUMN ${clm_name} ${dataTypeString}${constraintList};`;
+        }
+
+
+        // Execute the query
+        const [results, metadata] = await sequelize.query(query);
+      } catch (error) {
+        // Rollback the column creation and added column constraints
+        await column.destroy();
+        //Rollback column constraints added with the column ID
+        await ColumnConstraint.destroy({ where: { clm_id: column.clm_id } });
+        // Send error response
+        console.error('Error adding column to datatable:', error);
+        res.status(500).json({ error: 'Failed to add column' });
+        return;
       }
 
       res.status(201).json(column);
@@ -119,7 +177,7 @@ async function getColumnById(clm_id, res) {
 
 //update the column by its ID
 async function updateColumnById(req, res) {
-  const { clm_id, clm_name, data_type, default_value, max_length, constraints } = req.body;
+  const { clm_id, clm_name, data_type, default_value, max_length } = req.body;
 
   try {
     const column = await Column.findByPk(clm_id);
@@ -128,37 +186,63 @@ async function updateColumnById(req, res) {
       return;
     }
 
-    const updatedColumn = await column.update({ clm_name, data_type, default_value, max_length }, { where: { clm_id } });
+    if (data_type != column.data_type) {
+      res.status(500).json({ error: 'Data type cannot be changed' });
+      return;
+    }
+
+    const updatedColumn = await Column.update({ clm_name, default_value, max_length }, { where: { clm_id } });
 
     if (updatedColumn) {
-      // Get ids of rows of column constraint table with the clm_id
-      const oldColumnConstraints = await ColumnConstraint.findAll({ where: { clm_id } });
+      /*
+        If the column is updated succesfully, datatable_<tbl_id> should be altered to change the column name, default_value and max_lengtb only if data_type=3. Data type is changing only if it is equal t 3
+      */
+      let renameSuccessful = false;
+      try {
+        let dataTypeString = '';
 
-      // Remove all constraints related to this column
-      await ColumnConstraint.destroy({ where: { clm_id } });
-
-      if (constraints) {
-        try {
-          for (let i = 0; i < constraints.length; i++) {
-            const constraint = await Constraint.findByPk(constraints[i]);
-            if (constraint) {
-              await ColumnConstraint.create({ clm_id, constraint_id: constraint.constraint_id });
-            }
+        // SET DATA TYPE
+        if (data_type == 1) {
+          dataTypeString = 'int';
+        } else if (data_type == 2) {
+          dataTypeString = 'real';
+        } else if (data_type == 3) {
+          dataTypeString = 'varchar';
+          if (max_length) {
+            dataTypeString += `(${max_length})`;
           }
-        } catch (error) {
-          // Rollback the column update and added column constraints
-          await updatedColumn.update(column.dataValues);
-          //Rollback column constraints added with the column ID
-          await ColumnConstraint.destroy({ where: { clm_id } });
-          // Add back old constraints
-          for (let i = 0; i < oldColumnConstraints.length; i++) {
-            await ColumnConstraint.create({ clm_id, constraint_id: oldColumnConstraints[i].constraint_id });
-          }
-          // Send error response
-          console.error('Error adding column constraints:', error);
-          res.status(500).json({ error: 'Failed to update column' });
-          return;
         }
+
+
+        let renameQuery = `ALTER TABLE "iot-on-earth-public"."datatable_${column.tbl_id}" RENAME COLUMN ${column.clm_name} TO ${clm_name};`;
+        let query = '';
+        if (default_value && default_value != null) {
+
+          query = `ALTER TABLE "iot-on-earth-public"."datatable_${column.tbl_id}" ALTER COLUMN ${clm_name} TYPE ${dataTypeString} USING ${clm_name}::${dataTypeString}, ALTER COLUMN ${clm_name} SET DEFAULT '${default_value}';`;
+        } else {
+          query = `ALTER TABLE "iot-on-earth-public"."datatable_${column.tbl_id}" ALTER COLUMN ${clm_name} TYPE ${dataTypeString} USING ${clm_name}::${dataTypeString};`;
+        }
+
+        // Execute the query
+        if (column.clm_name != clm_name) {
+          const [results, metadata] = await sequelize.query(renameQuery);
+          renameSuccessful = true;
+          console.log('Rename successful');
+        }
+
+        const [results2, metadata2] = await sequelize.query(query);
+      } catch (error) {
+        console.error('Error updating column in datatable:', error);
+        // Rollback the column update
+        await Column.update({ clm_name: column.clm_name, default_value: column.default_value, max_length: column.max_length }, { where: { clm_id } });
+        if (renameSuccessful) {
+          console.log('Rollbacking column name change');
+          let query = `ALTER TABLE "iot-on-earth-public"."datatable_${column.tbl_id}" RENAME COLUMN ${clm_name} TO ${column.clm_name};`;
+          const [results, metadata] = sequelize.query
+        }
+        // Send error response
+        res.status(500).json({ error: 'Failed to update column' });
+        return;
       }
 
       res.status(200).json({ message: 'Column updated successfully' });
@@ -182,6 +266,21 @@ async function deleteColumnById(clm_id, res) {
     await column.destroy();
 
     // Column Constraints will be automatically deleted due to on_update cascade
+
+    /*
+      If the column is deleted succesfully, datatable_<tbl_id> should be altered to remove the column
+    */
+    try {
+      let query = `ALTER TABLE "iot-on-earth-public"."datatable_${column.tbl_id}" DROP COLUMN ${column.clm_name};`;
+      const [results, metadata] = await sequelize.query(query);
+    } catch (error) {
+      // Rollback the column deletion
+      await Column.create({ clm_name: column.clm_name, data_type: column.data_type, tbl_id: column.tbl_id, default_value: column.default_value, max_length: column.max_length });
+      // Send error response
+      console.error('Error deleting column from datatable:', error);
+      res.status(500).json({ error: 'Failed to delete column' });
+      return;
+    }
 
     res.status(200).json({ message: 'Column deleted successfully' });
   } catch (error) {
