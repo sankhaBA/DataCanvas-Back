@@ -142,8 +142,8 @@ async function truncateTable(req, res) {
 
 async function deleteTable(tbl_id, res) {
 
-  const deletedTable = await Table.destroy({ where: { tbl_id } });
   try {
+    const deletedTable = await Table.destroy({ where: { tbl_id } });
     if (deletedTable > 0) {
       let sql = 'DROP TABLE datatable_' + tbl_id;
       try{
