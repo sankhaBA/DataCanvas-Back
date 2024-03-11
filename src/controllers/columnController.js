@@ -224,9 +224,12 @@ async function updateColumnById(req, res) {
         }
 
         // Execute the query
-        const [results, metadata] = await sequelize.query(renameQuery);
-        renameSuccessful = true;
-        console.log('Rename successful');
+        if (column.clm_name != clm_name) {
+          const [results, metadata] = await sequelize.query(renameQuery);
+          renameSuccessful = true;
+          console.log('Rename successful');
+        }
+
         const [results2, metadata2] = await sequelize.query(query);
       } catch (error) {
         console.error('Error updating column in datatable:', error);
