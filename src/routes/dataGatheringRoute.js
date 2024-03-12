@@ -7,7 +7,7 @@ router.post('/insert', (req, res) => {
     const { project_id, fingerprint, table } = req.body;
 
     try {
-        if (validateFields(req.body)) {  // if project_id, fingerprint and table_id parameters are available, insert data
+        if (validateFields(req.body) && validateDataObject(req.body)) {  // if project_id, fingerprint and table_id parameters are available, insert data
             DataGatheringController.insertData(req, res);
         } else {  // If project_id, fingerprint and table_id parameters are not available, send bad request
             res.status(400).json({ error: 'Bad Request | CHECK project_id, fingerprint, table, data | id and device fields are automatically added | Request validation unsuccessful' });
@@ -24,9 +24,13 @@ router.delete('/delete', (req, res) => {
 
     try {
         if (validateFields(req.body)) {  // if project_id, fingerprint and table_id parameters are available, delete data
-            DataGatheringController.deleteData(req, res);
+            if (validateSearchFields(req.body)) { // if search_field and search_value parameters are available, delete data
+                DataGatheringController.deleteData(req, res);
+            } else {
+                res.status(400).json({ error: 'Bad Request | CHECK search_field, search_value | Request validation unsuccessful' });
+            }
         } else {  // If project_id, fingerprint and table_id parameters are not available, send bad request
-            res.status(400).json({ error: 'Bad Request | CHECK project_id, fingerprint, table, data | id and device fields are automatically added | Request validation unsuccessful' });
+            res.status(400).json({ error: 'sssBad Request | CHECK project_id, fingerprint, table, data | id and device fields are automatically added | Request validation unsuccessful' });
         }
     } catch (error) {
         console.error('Error deleting data:', error);
@@ -35,7 +39,7 @@ router.delete('/delete', (req, res) => {
 });
 
 const validateFields = (fields) => {
-    const { project_id, fingerprint, table, data } = fields;
+    const { project_id, fingerprint, table } = fields;
 
     if (!project_id || !fingerprint || !table) {
         console.log('project_id, fingerprint and table are required');
@@ -57,6 +61,12 @@ const validateFields = (fields) => {
         return false;
     }
 
+    return true;
+}
+
+const validateDataObject = (fields) => {
+    const { data } = fields;
+
     if (!data) {
         console.log('data is required');
         return false;
@@ -69,6 +79,22 @@ const validateFields = (fields) => {
 
     // Check if the data section has 'id' or 'device' section. If so, return false
     if (data.id || data.device) {
+        return false;
+    }
+
+    return true;
+}
+
+const validateSearchFields = (fields) => {
+    const { search_field, search_value } = fields;
+
+    if (!search_field || !search_value) {
+        console.log('search_field and search_value are required');
+        return false;
+    }
+
+    if (search_field.trim() == '' || search_value.trim() == '') {
+        console.log('search_field and search_value cannot be empty');
         return false;
     }
 

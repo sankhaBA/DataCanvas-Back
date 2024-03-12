@@ -27,7 +27,7 @@ async function insertData(req, res) {
     try {
         // Validate project_id, fingerprint and table
         const device_id = await validateDevice(fingerprint);
-        const tbl_id = await validateTable(table);
+        const tbl_id = await validateTable(project_id, table);
 
         if (!validateProject(project_id)) {
             res.status(404).json({ error: "Project not found | CHECK project_id" });
@@ -170,6 +170,78 @@ async function insertData(req, res) {
     }
 }
 
+async function deleteData(req, res) {
+    /*
+    * Request body should contain:
+    * project_id: Project ID - INTEGER
+    * fingerprint: Device fingerprint - STRING of 32 characters
+    * table: Table name - STRING
+    * data: Data to be deleted - JSON object
+    * Sample data section
+    * data: {
+    *   "column1": "value1", - Data type of the value should match the data type of the column
+    *   "column2": "value2", - Data type of the value should match the data type of the column
+    *   "column3": "value3", - Data type of the value should match the data type of the column
+    * }
+    */
+    const { project_id, fingerprint, table, search_field, search_value } = req.body;
+
+    try {
+        //check if the table exists
+        const tbl_id = await validateTable(project_id, table);
+        const device_id = await validateDevice(fingerprint);
+
+        // validates if the project exists
+        if (!validateProject(project_id)) {
+            res.status(404).json({ error: "Project not found | CHECK project_id" });
+            return;
+        }
+
+        if (!tbl_id) {
+            res.status(404).json({ error: "Table not found | CHECK table name" });
+            return;
+        }
+
+        if (!device_id) {
+            res.status(404).json({ error: "Device not found | CHECK fingerprint" });
+        }
+
+        const columns = await getColumns(tbl_id);
+
+        if (!columns) {
+            res.status(404).json({ error: "Fields not found | CHECK table name" });
+            return;
+        }
+
+        const foundColumn = columns.find(clm => clm.clm_name === search_field);
+
+        if (!foundColumn) {
+            res.status(400).json({ error: `Column ${search_field} not found | CHECK field name` });
+            return;
+        }
+
+        if (!validateColumnDataType(foundColumn.data_type, search_value)) {
+            res.status(400).json({ error: `Data type of ${search_field} does not match | CHECK data type` });
+            return;
+        }
+
+        //constructing the delete query
+        let deleteData = `DELETE FROM "iot-on-earth-public"."datatable_${tbl_id}" WHERE ${search_field}='${search_value}'`;
+
+        try {
+            const result = await sequelize.query(deleteData);
+            res.status(200).json({ message: 'Data deleted successfully' });
+        } catch (error) {
+            console.error('Error deleting data:', error);
+            res.status(500).json({ message: 'Failed to delete data | Something went wrong', error: error });
+        }
+    }
+    catch (error) {
+        console.error('Error deleting data:', error);
+        res.status(500).json({ message: 'Failed to delete data | Something went wrong' });
+    }
+}
+
 // Check project_id is a valid and available project
 const validateProject = async (project_id) => {
     try {
@@ -203,9 +275,9 @@ const validateDevice = async (fingerprint) => {
 }
 
 // Check table is a name from a valid and available table and return tbl_id
-const validateTable = async (table) => {
+const validateTable = async (project_id, table) => {
     try {
-        let tbl = await Table.findOne({ where: { tbl_name: table } });
+        let tbl = await Table.findOne({ where: { tbl_name: table, project_id: project_id } });
 
         if (!tbl) {
             return false;
@@ -283,90 +355,8 @@ const validateColumnMaxLength = async (maxLength, data) => {
 }
 
 module.exports = {
-    insertData
+    insertData,
+    deleteData
 };
 
-async function deleteData(req, res) {
-    /*
-    * Request body should contain:
-    * project_id: Project ID - INTEGER
-    * fingerprint: Device fingerprint - STRING of 32 characters
-    * table: Table name - STRING
-    * data: Data to be deleted - JSON object
-    * Sample data section
-    * data: {
-    *   "column1": "value1", - Data type of the value should match the data type of the column
-    *   "column2": "value2", - Data type of the value should match the data type of the column
-    *   "column3": "value3", - Data type of the value should match the data type of the column
-    * }
-    */
-    const { project_id, fingerprint, table, data } = req.body;
 
-    try {
-        //check if the table exists
-        const tbl_id = await validateTable(table);
-        const device_id = await validateDevice(fingerprint);
-        if (!tbl_id) {
-            res.status(404).json({ error: "Table not found | CHECK table name" });
-            return;
-        }
-
-        // validates if the project exists
-        if (!validateProject(project_id)) {
-            res.status(404).json({ error: "Project not found | CHECK project_id" });
-            return;
-        }
-        if(!device_id){
-            res.status(404).json({ error: "Device not found | CHECK fingerprint" });
-        }
-
-        const columns = await getColumns(tbl_id);
-
-        if (!columns) {
-            res.status(404).json({ error: "Fields not found | CHECK table name" });
-            return;
-        }
-        
-        for (let column in where) {
-
-            const foundColumn = columns.find(clm => clm.clm_name === column);
-            if (!foundColumn) {
-                res.status(400).json({ error: `Column ${column} not found | CHECK column name` });
-                return;
-            }
-
-            if (!validateColumnDataType(foundColumn.data_type, where[column])) {
-                res.status(400).json({ error: `Data type of ${column} does not match | CHECK data type` });
-                return;
-            }
-        }
-
-        //constructing the delete query
-
-        let deleteData = `DELETE FROM "iot-on-earth-public"."datatable_${tbl_id}" WHERE `;
-        for (let column in where) {
-            deleteData += `"${column}" = '${where[column]}' AND `;
-        }
-
-        //remove the trailing AND 
-        deleteData = deleteData.slice(0, -5);
-
-        try{
-            const result = await sequelize.query(deleteData);
-            res.status(200).json({ message: 'Data deleted successfully' });
-        }catch (error){
-            console.error('Error deleting data:', error);
-            res.status(500).json({ message: 'Failed to delete data | Something went wrong', error: error });
-        }
-    
-
-
-       }
-       catch (error) {
-        console.error('Error deleting data:', error);
-        res.status(500).json({ message: 'Failed to delete data | Something went wrong' });
-       }
-    }
-       module.exports = {
-        deleteData
-       };
