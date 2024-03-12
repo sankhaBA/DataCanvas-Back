@@ -26,7 +26,7 @@ async function insertData(req, res) {
     try {
         // Validate project_id, fingerprint and table
         const device_id = await validateDevice(fingerprint);
-        const tbl_id = await validateTable(table);
+        const tbl_id = await validateTable(project_id, table);
 
         if (!validateProject(project_id)) {
             res.status(404).json({ error: "Project not found | CHECK project_id" });
@@ -202,9 +202,9 @@ const validateDevice = async (fingerprint) => {
 }
 
 // Check table is a name from a valid and available table and return tbl_id
-const validateTable = async (table) => {
+const validateTable = async (project, table) => {
     try {
-        let tbl = await Table.findOne({ where: { tbl_name: table } });
+        let tbl = await Table.findOne({ where: { tbl_name: table, project_id: project } });
 
         if (!tbl) {
             return false;
