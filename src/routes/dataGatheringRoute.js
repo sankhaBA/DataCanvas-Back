@@ -76,9 +76,10 @@ const validateFields = (fields) => {
 }
 
 //validate update fields data
-const validateDataFields = (data) => {
-    if(!data.id || !data.value){
-        console.log('index_id and index_value are required');
+const validateDataFields = (fields) => {
+    const { index_column, index_value} = fields;
+    if(!index_column|| !index_value){
+        console.log('index_column and index_value are required');
         return false;
     }
 
