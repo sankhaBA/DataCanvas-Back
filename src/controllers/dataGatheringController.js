@@ -29,7 +29,7 @@ async function insertData(req, res) {
         const device_id = await validateDevice(fingerprint);
         const tbl_id = await validateTable(project_id, table);
 
-        if (!validateProject(project_id)) {
+        if (!await validateProject(project_id)) {
             res.status(404).json({ error: "Project not found | CHECK project_id" });
             return;
         }
@@ -170,6 +170,195 @@ async function insertData(req, res) {
     }
 }
 
+async function updateData(req, res) {
+    /*
+        * Request body should contain:
+        * project_id: Project ID - INTEGER
+        * fingerprint: Device fingerprint - STRING of 32 characters
+        * table: Table name - STRING
+        * search_field: Field name - STRING
+        * search_value: Field value -  Data type of the value should match the data type of the search_field column
+        * data: Data to be inserted - JSON object
+        * Sample data section
+        * data: {
+        *   "column1": "value1", - Data type of the value should match the data type of the column
+        *   "column2": "value2", - Data type of the value should match the data type of the column
+        *   "column3": "value3", - Data type of the value should match the data type of the column
+        * }
+    */
+
+    const { project_id, fingerprint, table, search_field, search_value, data } = req.body;
+
+    try {
+        // Validate project_id, fingerprint and table
+        const device_id = await validateDevice(fingerprint);
+        const tbl_id = await validateTable(project_id, table);
+
+        if (!await validateProject(project_id)) {
+            res.status(404).json({ error: "Project not found | CHECK project_id" });
+            return;
+        }
+
+        if (!device_id) {
+            res.status(404).json({ error: "Device not found | CHECK fingerprint" });
+            return;
+        }
+        if (!tbl_id) {
+            res.status(404).json({ error: "Table not found | CHECK table name" });
+            return;
+        }
+
+        /* 
+        * Get all columns of the table
+        * Structure of the columns object
+        * columns: [
+        *   {
+                "clm_id": 40,
+                "clm_name": "id",
+                "data_type": 1,
+                "tbl_id": 26,
+                "default_value": null,
+                "max_length": null,
+                "constraints": [
+                    {
+                        "constraint_id": 1
+                    },
+                    {
+                        "constraint_id": 4
+                    }
+                ]
+            },
+            {
+                "clm_id": 42,
+                "clm_name": "temperature_in",
+                "data_type": 2,
+                "tbl_id": 26,
+                "default_value": "",
+                "max_length": 0,
+                "constraints": []
+            },
+        * ]
+        */
+
+        const columns = await getColumns(tbl_id);
+        if (!columns) {
+            res.status(404).json({ error: "Fields not found | CHECK table name" });
+            return;
+        }
+
+        /* 
+            * Check if all the columns in the data object are available in the columns list, if not, send bad request
+            * All the columns in the columns list is not needed to be in the data object, but all the columns in the data object should be in the columns list
+            * Also check if the data type of the value matches the data type of the column, if not, send bad request
+            * Check the columns list and if there are any columns with constraints of constraint_id 2 (NOT NULL), check if the data object contains those columns, if not, send bad request
+            * If any of the above conditions are not met, send bad request with the appropriate message and return
+            * If there are extra columns in the data object that are not in the columns list, send bad request with the appropriate message and return
+            * Data object looks like this
+            * data: {
+            *   "column1": "value1", - Data type of the value should match the data type of the column
+            *   "column2": "value2", - Data type of the value should match the data type of the column
+            *   "column3": "value3", - Data type of the value should match the data type of the column
+            * }
+        */
+
+        /*
+            * Check if the search_field and search_value matches above validations
+        */
+
+        let foundColumn = false
+        foundColumn = columns.find(clm => clm.clm_name === search_field);
+
+        if (!foundColumn) {
+            res.status(400).json({ error: `Column ${search_field} not found | CHECK field name` });
+            return;
+        }
+
+        if (!validateColumnDataType(foundColumn.data_type, search_value)) {
+            res.status(400).json({ error: `Data type of search_value does not match | CHECK data type` });
+            return;
+        }
+
+        foundColumn = false;
+        // Validate other columns in data section        
+        for (let column in data) {
+            foundColumn = columns.find((clm) => { if (clm.clm_name == column) { return clm } else { return false } });
+
+            if (!foundColumn) {
+                res.status(400).json({ error: `Column ${column} not found | CHECK column name` });
+                return;
+            }
+
+            // Check data type of the value
+            if (!validateColumnDataType(foundColumn.data_type, data[column])) {
+                res.status(400).json({ error: `Data type of ${column} does not match | CHECK data type` });
+                return;
+            }
+
+            // Check max length of the value
+            if (foundColumn.max_length != null && foundColumn.dataType == 2 && !validateColumnMaxLength(foundColumn.max_length, data[column])) {
+                res.status(400).json({ error: `Max length of ${column} exceeded | CHECK data length` });
+                return;
+            }
+
+            // Check if the column has constraint of NOT NULL
+            let notNull = foundColumn.constraints.find((constraint) => { if (constraint.constraint_id == 2) { return true } else { return false } });
+
+            if (notNull && !data[column] == null || data[column] == undefined) {
+                res.status(400).json({ error: `Column ${column} cannot be NULL | CHECK column value` });
+                return;
+            }
+        }
+
+        // Get all the columns from columns list that have constraint_id = 2
+        let notNullColumns = columns.filter((clm) => {
+            let notNull = clm.constraints.find((constraint) => { if (constraint.constraint_id == 2) { return true } else { return false } });
+            if (notNull) {
+                return clm;
+            }
+        });
+
+        /* 
+            * Check that the data object contains those columns which are in notNullCOlumns (It is not needed to be so)
+            * If available, check that the value is null
+            * If null, send bad request with the appropriate message and return
+        */
+
+        for (let clm of notNullColumns) {
+            data.find((column) => {
+                if (clm.clm_name == column) {
+                    if (data[clm.clm_name] == null || data[clm.clm_name] == undefined) {
+                        res.status(400).json({ error: `Column ${clm.clm_name} cannot be NULL | CHECK column value` });
+                        return;
+                    }
+                }
+            });
+        }
+
+        // Update data
+        let updateData = `UPDATE "iot-on-earth-public"."datatable_${tbl_id}" SET `;
+        // Loop through the data object and create the update query
+        for (let column in data) {
+            updateData += `${column}='${data[column]}',`;
+        }
+
+        updateData = updateData.slice(0, -1) + ` WHERE ${search_field}='${search_value}'`;
+
+        try {
+            let result = await sequelize.query(updateData);
+            res.status(200).json({ message: 'Data updated successfully' });
+            return;
+        } catch (error) {
+            console.error('Error updating data:', error);
+            res.status(500).json({ message: 'Failed to update data | Something went wrong', error: error });
+            return;
+        }
+    } catch (error) {
+        console.error('Error updating data:', error);
+        res.status(500).json({ message: 'Failed to update data | Something went wrong' });
+        return;
+    }
+}
+
 async function deleteData(req, res) {
     /*
     * Request body should contain:
@@ -192,7 +381,7 @@ async function deleteData(req, res) {
         const device_id = await validateDevice(fingerprint);
 
         // validates if the project exists
-        if (!validateProject(project_id)) {
+        if (!await validateProject(project_id)) {
             res.status(404).json({ error: "Project not found | CHECK project_id" });
             return;
         }
@@ -319,7 +508,7 @@ const getColumns = async (tbl_id) => {
     }
 }
 
-const validateColumnDataType = async (dataType, data) => {
+const validateColumnDataType = (dataType, data) => {
     /*
     * Data types
     * 1 - INTEGER
@@ -346,7 +535,7 @@ const validateColumnDataType = async (dataType, data) => {
     return true;
 }
 
-const validateColumnMaxLength = async (maxLength, data) => {
+const validateColumnMaxLength = (maxLength, data) => {
     if (data.length > maxLength) {
         return false;
     }
@@ -356,7 +545,8 @@ const validateColumnMaxLength = async (maxLength, data) => {
 
 module.exports = {
     insertData,
-    deleteData
+    deleteData,
+    updateData
 };
 
 

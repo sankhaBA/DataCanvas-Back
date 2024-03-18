@@ -4,8 +4,6 @@ const DataGatheringController = require('../controllers/dataGatheringController'
 
 // post request to insert data
 router.post('/insert', (req, res) => {
-    const { project_id, fingerprint, table } = req.body;
-
     try {
         if (validateFields(req.body) && validateDataObject(req.body)) {  // if project_id, fingerprint and table_id parameters are available, insert data
             DataGatheringController.insertData(req, res);
@@ -18,10 +16,26 @@ router.post('/insert', (req, res) => {
     }
 });
 
+// put request to update data
+router.put('/update', (req, res) => {
+    try {
+        if (validateFields(req.body) && validateDataObject(req.body)) {  // if project_id, fingerprint and table_id parameters are available, update data
+            if (validateSearchFields(req.body)) {
+                DataGatheringController.updateData(req, res);
+            } else {
+                res.status(400).json({ error: 'Bad Request | CHECK search_field, search_value | Request validation unsuccessful' });
+            }
+        } else {  // If project_id, fingerprint and table_id parameters are not available, send bad request
+            res.status(400).json({ error: 'Bad Request | CHECK project_id, fingerprint, table, data | id and device fields are automatically added | Request validation unsuccessful' });
+        }
+    } catch (error) {
+        console.error('Error updating data:', error);
+        res.status(500).json({ message: 'Failed to update data' });
+    }
+});
+
 // delete request to delete data
 router.delete('/delete', (req, res) => {
-    const { project_id, fingerprint, table } = req.body;
-
     try {
         if (validateFields(req.body)) {  // if project_id, fingerprint and table_id parameters are available, delete data
             if (validateSearchFields(req.body)) { // if search_field and search_value parameters are available, delete data

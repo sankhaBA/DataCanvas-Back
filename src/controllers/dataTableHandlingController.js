@@ -122,10 +122,8 @@ async function updateTable(req, res) {
   }
 }
 
-async function truncateTable(req, res) {
-  const { tbl_id } = req.body;
-
-  let sql = 'TRUNCATE TABLE datatable_' + tbl_id;
+async function truncateTable(tbl_id, res) {
+  let sql = `TRUNCATE TABLE "iot-on-earth-public"."datatable_${tbl_id}"`;
 
   try {
     let result = await sequelize.query(sql);
@@ -137,16 +135,15 @@ async function truncateTable(req, res) {
     console.error("Error truncating table:", error);
     res.status(500).json({ error: "Failed to truncate table" });
   }
-  
+
 }
 
 async function deleteTable(tbl_id, res) {
-
   try {
     const deletedTable = await Table.destroy({ where: { tbl_id } });
     if (deletedTable > 0) {
-      let sql = 'DROP TABLE datatable_' + tbl_id;
-      try{
+      let sql = `TRUNCATE TABLE "iot-on-earth-public"."datatable_${tbl_id}"`;
+      try {
         let result = await sequelize.query(sql);
       } catch (error) {
         console.error("Error deleting table:", error);
