@@ -25,7 +25,7 @@ app.use("/api/data/tbl", dataTableHandlingRoute);
 app.use("/api/data/clm", columnRoute);
 app.use("/api/data/config", dataConfigRoute);
 app.use("/api/data/feed", dataGatheringRoute);
-app.use("/api/data/get", dataTableHandlingRoute);
+app.use("/api/data/get", dataRetrievalRoute);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

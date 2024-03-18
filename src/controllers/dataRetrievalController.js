@@ -20,7 +20,7 @@ const getAllDataOfATable = async (req, res) => {
             return res.status(404).json({ message: 'Table not found' });
         }
 
-        let sql = `SELECT * FROM ${tableName} dt INNER JOIN devices d ON d.device_id = dt.device LIMIT ${limit} OFFSET ${offset} `;
+        let sql = `SELECT * FROM "iot-on-earth-public"."${tableName}" AS dt INNER JOIN "iot-on-earth-public"."devices" AS d ON d.device_id = dt.device ORDER BY dt.id ASC LIMIT ${limit} OFFSET ${offset}`;
         const data = await sequelize.query(sql);
 
         res.status(200).json(data[0]);
