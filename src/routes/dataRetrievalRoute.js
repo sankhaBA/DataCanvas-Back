@@ -17,4 +17,19 @@ router.get('/all/', (req, res) => {
     }
 })
 
+//Get request to retrive the record count of a table
+router.get('/count/', (req, res) => {
+    const { tbl_id } = req.query;
+    try {
+        if (tbl_id) {
+            DataRetrievalController.getCountOfTable(tbl_id, res);
+        } else {
+            res.status(400).json({ error: 'Bad Request | CHECK table | Request validation unsuccessful' });
+        }
+    } catch (error) {
+        console.error('Error retrieving data:', error);
+        res.status(500).json({ message: 'Failed to retrieve data' });
+    }
+})
+
 module.exports = router;
