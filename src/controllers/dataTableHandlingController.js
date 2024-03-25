@@ -25,6 +25,20 @@ async function createTable(req, res) {
     return;
   }
 
+  // Check tbl_name already exists
+  try {
+    let table = await Table.findOne({ where: { tbl_name } });
+
+    if (table) {
+      res.status(409).json({ message: "Table name already exists" });
+      return;
+    }
+  } catch (error) {
+    console.error("Error checking table name:", error);
+    res.status(500).json({ error: "Failed to check table name" });
+    return;
+  }
+
   try {
     let table = await Table.create({ tbl_name, project_id });
 

@@ -18,7 +18,7 @@ const dataRetrievalRoute = require("./routes/dataRetrievalRoute");
 const PORT = process.env.PORT || 3001;
 
 app.use("/api/user", userRoute);
-app.use("/api/auth", verifyToken, authRoute);
+app.use("/api/auth", authRoute);
 app.use("/api/project", verifyToken, projectRoute);
 app.use("/api/device", verifyToken, deviceRoute);
 app.use("/api/data/tbl", verifyToken, dataTableHandlingRoute);

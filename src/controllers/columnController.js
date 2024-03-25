@@ -66,10 +66,12 @@ async function addColumn(req, res) {
         }
 
         // SET CONSTRAINTS
+        let isAutoIncrementing = false;
         for (let i = 0; i < constraints.length; i++) {
           switch (constraints[i]) {
             case 1:
-              constraintList += ' AUTO INCREMENT';
+              constraintList += ' SERIAL';
+              isAutoIncrementing = true;
               break;
             case 2:
               constraintList += ' NOT NULL';
@@ -81,12 +83,15 @@ async function addColumn(req, res) {
         }
 
         let query = '';
-        if (default_value && default_value != null) {
-          query = `ALTER TABLE "iot-on-earth-public"."datatable_${tbl_id}" ADD COLUMN ${clm_name} ${dataTypeString} DEFAULT '${default_value}'${constraintList};`;
+        if (isAutoIncrementing) {
+          query = `ALTER TABLE "iot-on-earth-public"."datatable_${tbl_id}" ADD COLUMN ${clm_name} ${constraintList};`;
         } else {
-          query = `ALTER TABLE "iot-on-earth-public"."datatable_${tbl_id}" ADD COLUMN ${clm_name} ${dataTypeString}${constraintList};`;
+          if (default_value && default_value != null) {
+            query = `ALTER TABLE "iot-on-earth-public"."datatable_${tbl_id}" ADD COLUMN ${clm_name} ${dataTypeString} DEFAULT '${default_value}'${constraintList};`;
+          } else {
+            query = `ALTER TABLE "iot-on-earth-public"."datatable_${tbl_id}" ADD COLUMN ${clm_name} ${dataTypeString}${constraintList};`;
+          }
         }
-
 
         // Execute the query
         const [results, metadata] = await sequelize.query(query);
