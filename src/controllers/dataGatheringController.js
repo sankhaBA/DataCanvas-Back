@@ -464,9 +464,9 @@ const validateDevice = async (fingerprint) => {
 }
 
 // Check table is a name from a valid and available table and return tbl_id
-const validateTable = async (project_id, table) => {
+const validateTable = async (project, table) => {
     try {
-        let tbl = await Table.findOne({ where: { tbl_name: table, project_id: project_id } });
+        let tbl = await Table.findOne({ where: { tbl_name: table, project_id: project } });
 
         if (!tbl) {
             return false;
