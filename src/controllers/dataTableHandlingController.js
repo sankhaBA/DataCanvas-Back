@@ -4,7 +4,7 @@ const Devices = require("../models/deviceModel");
 const Column = require("../models/columnModel");
 const Constraint = require("../models/constraintModel");
 const ColumnConstraint = require("../models/columnConstraintModel");
-const { DataTypes, Model } = require("sequelize");
+const { DataTypes, Model, Sequelize } = require("sequelize");
 const sequelize = require("./../../db");
 require("dotenv").config();
 
@@ -22,6 +22,20 @@ async function createTable(req, res) {
     // If error, return error message
     console.error("Error checking project_id:", error);
     res.status(500).json({ error: "Failed to check project ID" });
+    return;
+  }
+
+  // Check tbl_name already exists
+  try {
+    let table = await Table.findOne({ where: { tbl_name: tbl_name, project_id: project_id } });
+
+    if (table) {
+      res.status(409).json({ message: "Table name already exists" });
+      return;
+    }
+  } catch (error) {
+    console.error("Error checking table name:", error);
+    res.status(500).json({ error: "Failed to check table name" });
     return;
   }
 
@@ -122,14 +136,34 @@ async function updateTable(req, res) {
   }
 }
 
-async function truncateTable(req, res) {
-  res.status(200).json({ message: "Truncate table function not created yet" });
+async function truncateTable(tbl_id, res) {
+  let sql = `TRUNCATE TABLE "iot-on-earth-public"."datatable_${tbl_id}"`;
+
+  try {
+    let result = await sequelize.query(sql);
+
+    if (result) {
+      res.status(200).json({ message: "Table truncated successfully" });
+    }
+  } catch (error) {
+    console.error("Error truncating table:", error);
+    res.status(500).json({ error: "Failed to truncate table" });
+  }
+
 }
 
 async function deleteTable(tbl_id, res) {
-  const deletedTable = await Table.destroy({ where: { tbl_id } });
   try {
+    const deletedTable = await Table.destroy({ where: { tbl_id } });
     if (deletedTable > 0) {
+      let sql = `TRUNCATE TABLE "iot-on-earth-public"."datatable_${tbl_id}"`;
+      try {
+        let result = await sequelize.query(sql);
+      } catch (error) {
+        console.error("Error deleting table:", error);
+        res.status(202).json({ error: "Table deleted partially" });
+      }
+
       res.status(200).json({ message: "Table deleted successfully" });
     } else {
       res.status(404).json({ message: "Table not found" });
@@ -183,9 +217,19 @@ async function createRelations(tbl_id) {
           //   onDelete: 'CASCADE',
           // },
         },
+        created_at: {
+          type: DataTypes.DATE,
+          defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+        },
+        updated_at: {
+          type: DataTypes.DATE,
+          defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+        }
       },
       {
         timestamps: true,
+        createdAt: "created_at",
+        updatedAt: "updated_at",
         underscored: true,
         schema: "iot-on-earth-public",
         tableName: tableName,
@@ -200,7 +244,7 @@ async function createRelations(tbl_id) {
     });
 
     // Synchronize table
-    table.sync({ force: true });
+    await table.sync({ force: true });
 
     return true;
   } catch (error) {
