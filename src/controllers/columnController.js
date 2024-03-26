@@ -17,6 +17,13 @@ async function addColumn(req, res) {
       return;
     }
 
+    // Check for clm_name duplications for the table tbl_id
+    const columnExists = await Column.findOne({ where: { clm_name, tbl_id } });
+    if (columnExists) {
+      res.status(409).json({ message: 'Column name already exists' });
+      return;
+    }
+
     const column = await Column.create({ clm_name, data_type, tbl_id, default_value, max_length });
 
     if (column) {
@@ -66,10 +73,12 @@ async function addColumn(req, res) {
         }
 
         // SET CONSTRAINTS
+        let isAutoIncrementing = false;
         for (let i = 0; i < constraints.length; i++) {
           switch (constraints[i]) {
             case 1:
-              constraintList += ' AUTO INCREMENT';
+              constraintList += ' SERIAL';
+              isAutoIncrementing = true;
               break;
             case 2:
               constraintList += ' NOT NULL';
@@ -81,12 +90,15 @@ async function addColumn(req, res) {
         }
 
         let query = '';
-        if (default_value && default_value != null) {
-          query = `ALTER TABLE "iot-on-earth-public"."datatable_${tbl_id}" ADD COLUMN ${clm_name} ${dataTypeString} DEFAULT '${default_value}'${constraintList};`;
+        if (isAutoIncrementing) {
+          query = `ALTER TABLE "iot-on-earth-public"."datatable_${tbl_id}" ADD COLUMN ${clm_name} ${constraintList};`;
         } else {
-          query = `ALTER TABLE "iot-on-earth-public"."datatable_${tbl_id}" ADD COLUMN ${clm_name} ${dataTypeString}${constraintList};`;
+          if (default_value && default_value != null) {
+            query = `ALTER TABLE "iot-on-earth-public"."datatable_${tbl_id}" ADD COLUMN ${clm_name} ${dataTypeString} DEFAULT '${default_value}'${constraintList};`;
+          } else {
+            query = `ALTER TABLE "iot-on-earth-public"."datatable_${tbl_id}" ADD COLUMN ${clm_name} ${dataTypeString}${constraintList};`;
+          }
         }
-
 
         // Execute the query
         const [results, metadata] = await sequelize.query(query);
@@ -187,7 +199,14 @@ async function updateColumnById(req, res) {
     }
 
     if (data_type != column.data_type) {
-      res.status(500).json({ error: 'Data type cannot be changed' });
+      res.status(405).json({ error: 'Data type cannot be changed' });
+      return;
+    }
+
+    // Check for clm_name duplications for the table tbl_id
+    const columnExists = await Column.findOne({ where: { clm_name, tbl_id } });
+    if (columnExists) {
+      res.status(409).json({ message: 'Column name already exists' });
       return;
     }
 
