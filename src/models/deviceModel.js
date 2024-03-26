@@ -11,21 +11,17 @@ Device.init({
         primaryKey: true,
         autoIncrement: true
     },
-
     device_name: {
         type: DataTypes.STRING,
         allowNull: false,
     },
-
     description: {
         type: DataTypes.STRING,
     },
-
     fingerprint: {
         type: DataTypes.STRING,
         allowNull: false
     },
-
     project_id: {
         type: DataTypes.INTEGER,
         References: {
@@ -47,6 +43,5 @@ Device.belongsTo(Project, {
     foreignKey: 'project_id',
     as: 'project',
 });
-
 
 module.exports = Device;

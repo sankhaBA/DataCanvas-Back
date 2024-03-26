@@ -10,7 +10,6 @@ router.get('/', (req, res) => {
         if (project_id) {  // if project_id parameter is available
             DeviceController.getDevicesByProjectId(project_id, res);
         } else {  // If project_id parameter is not available
-            console.log("no project_id");
             res.status(400).json({ message: 'Bad Request' });
         }
     } catch (error) {
@@ -28,7 +27,6 @@ router.get('/:deviceId', (req, res) => {
         if (deviceId && !isNaN(deviceId)) {  // if deviceId parameter is available
             DeviceController.getDeviceById(deviceId, res);
         } else {  // If deviceId parameter is not available
-            console.log("no deviceId");
             res.status(400).json({ message: 'Bad Request' });
         }
     } catch (error) {
@@ -46,7 +44,6 @@ router.get('/fingerprint/:deviceFingerprint', (req, res) => {
         if (deviceFingerprint) {  // if deviceFingerprint parameter is available
             DeviceController.getDeviceByFingerprint(deviceFingerprint, res);
         } else {  // If deviceFingerprint parameter is not available
-            console.log("no deviceFingerprint");
             res.status(400).json({ message: 'Bad Request' });
         }
     } catch (error) {
@@ -55,8 +52,6 @@ router.get('/fingerprint/:deviceFingerprint', (req, res) => {
     }
 
 });
-
-
 
 // POST request for /api/device, and create a new device
 router.post('/', (req, res) => {
@@ -79,9 +74,7 @@ router.put('/', (req, res) => {
     try {
         if (device_id && device_name && device_name != "") {
             DeviceController.updateDeviceById(req, res);
-            
         } else {
-            console.log("no device_id");
             res.status(400).json({ message: 'Bad Request' });
         }
     } catch (error) {
@@ -98,7 +91,6 @@ router.delete('/', (req, res) => {
         if (device_id) {  // if deviceId parameter is available
             DeviceController.deleteDeviceById(device_id, res);
         } else {  // If deviceId parameter is not available     
-            console.log("no deviceId");
             res.status(400).json({ message: 'Bad Request' });
         }
     } catch (error) {
@@ -109,18 +101,18 @@ router.delete('/', (req, res) => {
 });
 
 // DELETE request for /api/device/all, and delete all devices with the required project_id
-router.delete('/all', (req,res)=>{
+router.delete('/all', (req, res) => {
 
     const project_id = req.body.project_id;
 
-    try{
-        if(project_id) {
-            DeviceController.deleteAllDevicesByProjectId(project_id,res);
+    try {
+        if (project_id) {
+            DeviceController.deleteAllDevicesByProjectId(project_id, res);
         }
-        else{
+        else {
             res.status(400).json({ message: 'Bad Request' });
         }
-    } catch(error){
+    } catch (error) {
         console.error('Error deleting all devices:', error);
         res.status(500).json({ error: 'Failed to delete all devices' });
     }

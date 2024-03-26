@@ -10,14 +10,12 @@ router.get('/', (req, res) => {
         if (tbl_id) {  // if tbl_id parameter is available, send column details related to that tbl_id
             columnController.getAllColumns(tbl_id, res);
         } else {  // If tbl_id parameter is not available, send all columns
-            console.log("no tbl_id");
             res.status(400).json({ message: 'Bad Request' });
         }
     } catch (error) {
         console.error('Error getting all columns:', error);
         res.status(500).json({ message: 'Failed to get columns of table' });
     }
-
 });
 
 router.get('/:clm_id', (req, res) => {
@@ -27,14 +25,12 @@ router.get('/:clm_id', (req, res) => {
         if (clm_id) {  // if tbl_id parameter is available, send column details related to that tbl_id
             columnController.getColumnById(clm_id, res);
         } else {  // If tbl_id parameter is not available, send all columns
-            console.log("no clm_id");
             res.status(400).json({ message: 'Bad Request' });
         }
     } catch (error) {
         console.error('Error getting column:', error);
         res.status(500).json({ message: 'Failed to get column' });
     }
-
 });
 
 router.post('/', (req, res) => {
@@ -60,7 +56,6 @@ router.put('/', (req, res) => {
         if (clm_id) {  // if clm_id parameter is available, send column details related to that tbl_id
             columnController.updateColumnById(req, res);
         } else {  // If clm_id parameter is not available, send all columns
-            console.log("no clm_id");
             res.status(400).json({ message: 'Bad Request' });
         }
     } catch (error) {
@@ -76,7 +71,6 @@ router.delete('/', (req, res) => {
         if (clm_id) {  // if clm_id parameter is available, send column details related to that tbl_id
             columnController.deleteColumnById(clm_id, res);
         } else {  // If clm_id parameter is not available, send all columns
-            console.log("no clm_id");
             res.status(400).json({ message: 'Bad Request' });
         }
     } catch (error) {

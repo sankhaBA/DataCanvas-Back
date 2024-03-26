@@ -40,5 +40,4 @@ router.get('/constraint/:constraint_id', (req, res) => { // Get column constrain
     }
 });
 
-
 module.exports = router;

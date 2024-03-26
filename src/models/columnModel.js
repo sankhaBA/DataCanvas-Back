@@ -3,8 +3,6 @@ const sequelize = require('./../../db');
 const Table = require('./dataTableModel');
 const ColumnDataType = require('./columnDataTypeModel');
 
-// Model for column management with columns clm_id, clm_name, data_type, and tbl_id. tbl_id is referenced from dataTableModel model imported above
-
 class Column extends Model { }
 
 Column.init({
@@ -15,12 +13,10 @@ Column.init({
         primaryKey: true,
         autoIncrement: true
     },
-
     clm_name: {
         type: DataTypes.STRING,
         allowNull: false,
     },
-
     data_type: {
         type: DataTypes.INTEGER,
         References: {
@@ -28,7 +24,6 @@ Column.init({
             key: 'data_type'
         }
     },
-
     tbl_id: {
         type: DataTypes.INTEGER,
         References: {
@@ -36,12 +31,10 @@ Column.init({
             key: 'tbl_id'
         }
     },
-
     default_value: {
         type: DataTypes.STRING,
         allowNull: true,
     },
-
     max_length: {
         type: DataTypes.INTEGER,
         allowNull: true,
@@ -53,7 +46,6 @@ Column.init({
     tableName: 'columns',
     timestamps: true,
     underscored: true,
-
 }
 );
 

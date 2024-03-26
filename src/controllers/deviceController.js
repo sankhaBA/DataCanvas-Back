@@ -12,12 +12,11 @@ async function addDevice(req, res) {
             res.status(404).json({ message: "Project not found" });
             return;
         }
-    } catch (error) {  // If error, return error message
+    } catch (error) {
         console.error('Error checking project_id:', error);
         res.status(500).json({ error: 'Failed to check project ID' });
         return;
     }
-
 
     let fingerprint = await generateFingerprint();
 
@@ -27,7 +26,6 @@ async function addDevice(req, res) {
     }
 
     try {
-        console.log("fingerprint: ", fingerprint);
         let device = await Device.create({ device_name, description, fingerprint, project_id });
         res.status(200).json(device);
     } catch (error) {
@@ -105,8 +103,7 @@ async function updateDeviceById(req, res) {
     }
 }
 
-//delete device by device_id
-
+// Delete device by device_id
 async function deleteDeviceById(device_id, res) {
     const deletedDevice = await Device.destroy({ where: { device_id } });
 
@@ -122,24 +119,24 @@ async function deleteDeviceById(device_id, res) {
     }
 }
 
-//delete all devices by project_id
-async function deleteAllDevicesByProjectId(project_id,res){
-    const deletedDevice=await Device.destroy({where:{project_id}});
+// Delete all devices by project_id
+async function deleteAllDevicesByProjectId(project_id, res) {
+    const deletedDevice = await Device.destroy({ where: { project_id } });
 
-    try{
-        if(deletedDevice>0){
-            res.status(200).json({message:"Devices deleted successfully"});
+    try {
+        if (deletedDevice > 0) {
+            res.status(200).json({ message: "Devices deleted successfully" });
         }
-        else{
-            res.status(404).json({message:"Devices not found"});
+        else {
+            res.status(404).json({ message: "Devices not found" });
         }
-    }catch(erroe){
-        console.error('Error deleting devices :',error);
-        res.status(500).json({error:'Failed to delete devices'})
+    } catch (erroe) {
+        console.error('Error deleting devices :', error);
+        res.status(500).json({ error: 'Failed to delete devices' })
     }
 }
 
-//genrate fingerprint
+// Genrate fingerprint
 async function generateFingerprint() {
     let fingerprint = "";
     let deviceWithSameFingerprint;
@@ -162,7 +159,6 @@ async function generateFingerprint() {
 
     return fingerprint;
 }
-
 
 module.exports = {
     addDevice,

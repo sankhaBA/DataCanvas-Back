@@ -43,7 +43,6 @@ async function getColumnConstraintById(constraint_id, res) {
     }
 }
 
-
 module.exports = {
     getAllDataTypes,
     getAllConstraints,

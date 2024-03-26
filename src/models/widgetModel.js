@@ -40,8 +40,4 @@ Widget.init(
     }
 );
 
-Widget.belongsTo(DataTable, {
-    foreignKey: 'widgets_dataset_fkey',
-});
-
 module.exports = Widget;

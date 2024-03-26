@@ -2,8 +2,6 @@ const Project = require('../models/projectModel');
 const User = require('../models/userModel');
 require('dotenv').config();
 
-
-
 async function getProjectsByUserId(user_id, res) {
     try {
         // Check if user exists
@@ -101,8 +99,6 @@ async function deleteProjectById(project_id, res) {
         res.status(500).json({ error: 'Failed to delete project' });
     }
 }
-
-
 
 module.exports = {
     getProjectsByUserId,

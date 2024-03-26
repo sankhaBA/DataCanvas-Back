@@ -5,19 +5,16 @@ const Project = require('./projectModel');
 class DataTable extends Model { }
 
 DataTable.init({
-
     tbl_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
         autoIncrement: true
     },
-
     tbl_name: {
         type: DataTypes.STRING,
         allowNull: false,
     },
-
     project_id: {
         type: DataTypes.INTEGER,
         References: {

@@ -2,11 +2,8 @@ const Table = require("../models/dataTableModel");
 const Project = require("../models/projectModel");
 const Devices = require("../models/deviceModel");
 const Column = require("../models/columnModel");
-const Constraint = require("../models/constraintModel");
 const ColumnConstraint = require("../models/columnConstraintModel");
-const DataTypes = require("../models/columnDataTypeModel");
 const sequelize = require("./../../db");
-const { where } = require("sequelize");
 
 async function insertData(req, res) {
     /*
@@ -94,7 +91,6 @@ async function insertData(req, res) {
         *   "column3": "value3", - Data type of the value should match the data type of the column
         * }
         */
-
         let foundColumn = false
         for (let column in data) {
             foundColumn = columns.find((clm) => { if (clm.clm_name == column) { return clm } else { return false } });
@@ -105,7 +101,6 @@ async function insertData(req, res) {
             }
 
             // Check data type of the value
-            console.log("DATA TYPE VALIDATION : ", foundColumn.clm_name, foundColumn.data_type, data[column]);
             if (!validateColumnDataType(foundColumn.data_type, data[column])) {
                 res.status(400).json({ error: `Data type of ${column} does not match | CHECK data type` });
                 return;
@@ -281,7 +276,6 @@ async function updateData(req, res) {
         /*
             * Check if the search_field and search_value matches above validations
         */
-
         let foundColumn = false
         foundColumn = columns.find(clm => clm.clm_name === search_field);
 
@@ -354,7 +348,6 @@ async function updateData(req, res) {
             * If null, send bad request with the appropriate message and return
         */
 
-        console.log("DATA SECTION : ", data);
         for (let clm of notNullColumns) {
             for (let column in data) {
                 if (clm.clm_name == column) {
@@ -364,15 +357,6 @@ async function updateData(req, res) {
                     }
                 }
             }
-
-            // data.find((column) => {
-            //     if (clm.clm_name == column) {
-            //         if (data[clm.clm_name] == null || data[clm.clm_name] == undefined) {
-            //             res.status(400).json({ error: `Column ${clm.clm_name} cannot be NULL | CHECK column value` });
-            //             return;
-            //         }
-            //     }
-            // });
         }
 
         // Update data

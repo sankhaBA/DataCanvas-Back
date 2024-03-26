@@ -56,22 +56,18 @@ const validateFields = (fields) => {
     const { project_id, fingerprint, table } = fields;
 
     if (!project_id || !fingerprint || !table) {
-        console.log('project_id, fingerprint and table are required');
         return false;
     }
 
     if (fingerprint.trim() == '' || table.trim() == '') {
-        console.log('project_id, fingerprint and table cannot be empty');
         return false;
     }
 
     if (isNaN(project_id)) {
-        console.log('project_id must be a number');
         return false;
     }
 
     if (fingerprint.length != 32) {
-        console.log('fingerprint must be 32 characters long');
         return false;
     }
 
@@ -82,7 +78,6 @@ const validateDataObject = (fields) => {
     const { data } = fields;
 
     if (!data) {
-        console.log('data is required');
         return false;
     }
 
@@ -103,12 +98,10 @@ const validateSearchFields = (fields) => {
     const { search_field, search_value } = fields;
 
     if (!search_field || !search_value) {
-        console.log('search_field and search_value are required');
         return false;
     }
 
     if (search_field.trim() == '' || search_value.trim() == '') {
-        console.log('search_field and search_value cannot be empty');
         return false;
     }
 

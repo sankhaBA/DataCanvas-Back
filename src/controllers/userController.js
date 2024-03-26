@@ -6,12 +6,12 @@ require('dotenv').config();
 async function login(email, res) {
   try {
     let user = await User.findOne({ where: { email } });
-    
+
     user = {
       id: user.dataValues.user_id,
       email: user.dataValues.email,
     }
-    
+
     if (user) {
       const token = jwt.sign(user, 'secret', { expiresIn: '1h' });
 
@@ -38,7 +38,6 @@ async function getAllUsers(res) {
 
 // Get users by email
 async function getUsersByEmail(email, res) {
-
   try {
     const user = await User.findOne({ where: { email } });
 
@@ -90,7 +89,6 @@ async function updateUserByEmail(req, res) {
 
 // Delete user by email
 async function deleteUserByEmail(email, res) {
-
   try {
     const deletedRowCount = await User.destroy({ where: { email } });
 
