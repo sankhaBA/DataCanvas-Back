@@ -3,7 +3,6 @@ const router = express.Router();
 const DataTableHandlingController = require('../controllers/dataTableHandlingController');
 
 router.post('/', (req, res) => {
-
     try {
         if (!req.body.tbl_name || !req.body.project_id) {
             res.status(400).json({ message: 'Bad Request' });
@@ -108,7 +107,5 @@ router.delete('/all', (req, res) => {
         res.status(500).json({ error: 'Failed to delete all tables' });
     }
 });
-
-
 
 module.exports = router;

@@ -1,10 +1,4 @@
 const Table = require("../models/dataTableModel");
-const Project = require("../models/projectModel");
-const Devices = require("../models/deviceModel");
-const Column = require("../models/columnModel");
-const Constraint = require("../models/constraintModel");
-const ColumnConstraint = require("../models/columnConstraintModel");
-const DataTypes = require("../models/columnDataTypeModel");
 const sequelize = require("./../../db");
 
 const getAllDataOfATable = async (req, res) => {
@@ -28,7 +22,6 @@ const getAllDataOfATable = async (req, res) => {
         console.error('Error retrieving data:', error, tbl_id);
         res.status(500).json({ message: 'Failed to retrieve data' });
     }
-
 };
 
 const getCountOfTable = async (tbl_id, res) => {

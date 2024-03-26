@@ -3,19 +3,15 @@ const sequelize = require('../../db');
 const Column = require('./columnModel');
 const Constraint = require('./constraintModel');
 
-
-// Model for Constraint management with columns id and clm_id, constraint_id. clm_id and constraint_id are referenced from columnModel and ConstraintModel models imported above
 class ColumnConstraint extends Model { }
 
 ColumnConstraint.init({
-
     id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
         autoIncrement: true
     },
-
     clm_id: {
         type: DataTypes.INTEGER,
         References: {
@@ -23,7 +19,6 @@ ColumnConstraint.init({
             key: 'clm_id'
         }
     },
-
     constraint_id: {
         type: DataTypes.INTEGER,
         References: {

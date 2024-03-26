@@ -18,7 +18,6 @@ router.get('/', (req, res) => {
         console.error('Error getting users:', error);
         res.status(500).json({ error: 'Failed to get users' });
     }
-
 });
 
 // POST request for /api/user, and create a new user
@@ -50,8 +49,6 @@ router.put('/', (req, res) => {
         console.error('Error updating user:', error);
         res.status(500).json({ error: 'Failed to update user' });
     }
-
-
 });
 
 // DELETE request for /api/user/:email, and delete the user with the required email
@@ -68,7 +65,6 @@ router.delete('/', (req, res) => {
         console.error('Error deleting user:', error);
         res.status(500).json({ error: 'Failed to delete user' });
     }
-
 });
 
 

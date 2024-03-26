@@ -17,7 +17,6 @@ router.get('/', (req, res) => {
         console.error('Error getting all columns:', error);
         res.status(500).json({ message: 'Failed to get columns of table' });
     }
-
 });
 
 router.get('/:clm_id', (req, res) => {
@@ -34,7 +33,6 @@ router.get('/:clm_id', (req, res) => {
         console.error('Error getting column:', error);
         res.status(500).json({ message: 'Failed to get column' });
     }
-
 });
 
 router.post('/', (req, res) => {

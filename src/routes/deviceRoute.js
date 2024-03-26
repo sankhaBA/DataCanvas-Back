@@ -56,8 +56,6 @@ router.get('/fingerprint/:deviceFingerprint', (req, res) => {
 
 });
 
-
-
 // POST request for /api/device, and create a new device
 router.post('/', (req, res) => {
     try {
@@ -79,7 +77,6 @@ router.put('/', (req, res) => {
     try {
         if (device_id && device_name && device_name != "") {
             DeviceController.updateDeviceById(req, res);
-            
         } else {
             console.log("no device_id");
             res.status(400).json({ message: 'Bad Request' });
@@ -109,18 +106,18 @@ router.delete('/', (req, res) => {
 });
 
 // DELETE request for /api/device/all, and delete all devices with the required project_id
-router.delete('/all', (req,res)=>{
+router.delete('/all', (req, res) => {
 
     const project_id = req.body.project_id;
 
-    try{
-        if(project_id) {
-            DeviceController.deleteAllDevicesByProjectId(project_id,res);
+    try {
+        if (project_id) {
+            DeviceController.deleteAllDevicesByProjectId(project_id, res);
         }
-        else{
+        else {
             res.status(400).json({ message: 'Bad Request' });
         }
-    } catch(error){
+    } catch (error) {
         console.error('Error deleting all devices:', error);
         res.status(500).json({ error: 'Failed to delete all devices' });
     }

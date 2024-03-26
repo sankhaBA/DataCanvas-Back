@@ -1,9 +1,7 @@
 const ColumnConstraint = require('../models/columnConstraintModel');
-const ColumnDataType = require('../models/columnDataTypeModel');
 const Column = require('../models/columnModel');
 const Table = require('../models/dataTableModel');
 const Constraint = require('../models/constraintModel');
-const { DataTypes, Model, Sequelize, col } = require("sequelize");
 const sequelize = require("./../../db");
 require('dotenv').config();
 
@@ -55,7 +53,6 @@ async function addColumn(req, res) {
       /* 
         If the column is created succesfully, datatable_<tbl_id> should be altered to add the new column
       */
-
       try {
         let dataTypeString = '';
         let constraintList = '';
@@ -112,7 +109,6 @@ async function addColumn(req, res) {
         res.status(500).json({ error: 'Failed to add column' });
         return;
       }
-
       res.status(201).json(column);
     } else {
       res.status(500).json({ error: 'Failed to add column' });
@@ -152,7 +148,6 @@ async function getAllColumns(tbl_id, res) {
       ]
     });
     res.status(200).json(columns);
-
   } catch (error) {
     console.error('Error getting all columns:', error);
     res.status(500).json({ error: 'Failed to get columns of table' });
@@ -232,7 +227,6 @@ async function updateColumnById(req, res) {
           }
         }
 
-
         let renameQuery = `ALTER TABLE "iot-on-earth-public"."datatable_${column.tbl_id}" RENAME COLUMN ${column.clm_name} TO ${clm_name};`;
         let query = '';
         if (default_value && default_value != null) {
@@ -285,7 +279,6 @@ async function deleteColumnById(clm_id, res) {
     await column.destroy();
 
     // Column Constraints will be automatically deleted due to on_update cascade
-
     /*
       If the column is deleted succesfully, datatable_<tbl_id> should be altered to remove the column
     */

@@ -17,7 +17,6 @@ router.get('/', (req, res) => {
         console.error('Error getting projects:', error);
         res.status(500).json({ error: 'Failed to get projects' });
     }
-
 });
 
 // GET request for /api/project/:projectId
@@ -35,7 +34,6 @@ router.get('/:projectId', (req, res) => {
         console.error('Error getting projects:', error);
         res.status(500).json({ error: 'Failed to get projects' });
     }
-
 });
 
 // POST request for /api/project, and create a new project

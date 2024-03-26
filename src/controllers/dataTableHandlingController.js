@@ -4,7 +4,7 @@ const Devices = require("../models/deviceModel");
 const Column = require("../models/columnModel");
 const Constraint = require("../models/constraintModel");
 const ColumnConstraint = require("../models/columnConstraintModel");
-const { DataTypes, Model, Sequelize } = require("sequelize");
+const { DataTypes, Sequelize } = require("sequelize");
 const sequelize = require("./../../db");
 require("dotenv").config();
 
@@ -19,7 +19,6 @@ async function createTable(req, res) {
       return;
     }
   } catch (error) {
-    // If error, return error message
     console.error("Error checking project_id:", error);
     res.status(500).json({ error: "Failed to check project ID" });
     return;
@@ -122,7 +121,7 @@ async function getTableById(tbl_id, res) {
 
 async function updateTable(req, res) {
   const { tbl_name, tbl_id } = req.body;
-  console.log(tbl_name, tbl_id);
+
   try {
     let updatedTable = await Table.update({ tbl_name }, { where: { tbl_id } });
     if (updatedTable > 0) {
@@ -149,7 +148,6 @@ async function truncateTable(tbl_id, res) {
     console.error("Error truncating table:", error);
     res.status(500).json({ error: "Failed to truncate table" });
   }
-
 }
 
 async function deleteTable(tbl_id, res) {
@@ -159,12 +157,11 @@ async function deleteTable(tbl_id, res) {
       let sql = `TRUNCATE TABLE "iot-on-earth-public"."datatable_${tbl_id}"`;
       try {
         let result = await sequelize.query(sql);
+        res.status(200).json({ message: "Table deleted successfully" });
       } catch (error) {
         console.error("Error deleting table:", error);
         res.status(202).json({ error: "Table deleted partially" });
       }
-
-      res.status(200).json({ message: "Table deleted successfully" });
     } else {
       res.status(404).json({ message: "Table not found" });
     }
@@ -174,6 +171,7 @@ async function deleteTable(tbl_id, res) {
   }
 }
 
+// Delete all tables of a project at once
 async function deleteAllTable(project_id, res) {
   const deletedTable = await Table.destroy({ where: { project_id } });
   try {
@@ -210,12 +208,6 @@ async function createRelations(tbl_id) {
         device: {
           type: DataTypes.INTEGER,
           defaultValue: -1,
-          // references: {
-          //   model: Devices,
-          //   key: "device_id",
-          //   onUpdate: 'CASCADE',
-          //   onDelete: 'CASCADE',
-          // },
         },
         created_at: {
           type: DataTypes.DATE,
