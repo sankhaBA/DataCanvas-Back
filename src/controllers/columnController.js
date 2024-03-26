@@ -192,7 +192,7 @@ async function updateColumnById(req, res) {
     }
 
     if (data_type != column.data_type) {
-      res.status(500).json({ error: 'Data type cannot be changed' });
+      res.status(405).json({ error: 'Data type cannot be changed' });
       return;
     }
 

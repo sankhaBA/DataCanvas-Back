@@ -105,6 +105,7 @@ async function insertData(req, res) {
             }
 
             // Check data type of the value
+            console.log("DATA TYPE VALIDATION : ", foundColumn.clm_name, foundColumn.data_type, data[column]);
             if (!validateColumnDataType(foundColumn.data_type, data[column])) {
                 res.status(400).json({ error: `Data type of ${column} does not match | CHECK data type` });
                 return;
@@ -116,19 +117,35 @@ async function insertData(req, res) {
                 return;
             }
 
+            // Check if the column has auto increment and there is a value for the column
             // Check if the column has constraint of NOT NULL
-            let notNull = foundColumn.constraints.find((constraint) => { if (constraint.constraint_id == 2) { return true } else { return false } });
+            let foundColumnConstraints = JSON.stringify(foundColumn.constraints)
+            foundColumnConstraints = JSON.parse(foundColumnConstraints)
+            let autoIncrement = foundColumnConstraints.some((constraint) => {
+                return constraint.constraint_id === 1;
+            });
+            let notNull = foundColumnConstraints.some((constraint) => {
+                return constraint.constraint_id === 2;
+            });
 
-            if (notNull && !data[column] == null || data[column] == undefined) {
-                res.status(400).json({ error: `Column ${column} cannot be NULL | CHECK column value` });
-                return;
+            if (autoIncrement) {
+                if (data[column]) {
+                    res.status(400).json({ error: `Column ${column} has auto increment | CHECK Column value should not be sent` });
+                    return;
+                }
+            } else {
+                if (notNull && !data[column] == null || data[column] == undefined) {
+                    res.status(400).json({ error: `Column ${column} cannot be NULL | CHECK column value` });
+                    return;
+                }
             }
         }
 
         // Get all the columns from columns list that have constraint_id = 2
         let notNullColumns = columns.filter((clm) => {
-            let notNull = clm.constraints.find((constraint) => { if (constraint.constraint_id == 2) { return true } else { return false } });
-            if (notNull) {
+            let notNull = clm.constraints.find((constraint) => { return constraint.constraint_id === 2; });
+            let autoIncrement = clm.constraints.find((constraint) => { return constraint.constraint_id === 1; });
+            if (!autoIncrement && notNull) {
                 return clm;
             }
         });
@@ -300,19 +317,33 @@ async function updateData(req, res) {
                 return;
             }
 
-            // Check if the column has constraint of NOT NULL
-            let notNull = foundColumn.constraints.find((constraint) => { if (constraint.constraint_id == 2) { return true } else { return false } });
+            let foundColumnConstraints = JSON.stringify(foundColumn.constraints)
+            foundColumnConstraints = JSON.parse(foundColumnConstraints)
+            let autoIncrement = foundColumnConstraints.some((constraint) => {
+                return constraint.constraint_id === 1;
+            });
+            let notNull = foundColumnConstraints.some((constraint) => {
+                return constraint.constraint_id === 2;
+            });
 
-            if (notNull && !data[column] == null || data[column] == undefined) {
-                res.status(400).json({ error: `Column ${column} cannot be NULL | CHECK column value` });
-                return;
+            if (autoIncrement) {
+                if (data[column]) {
+                    res.status(400).json({ error: `Column ${column} has auto increment | CHECK Column value should not be sent` });
+                    return;
+                }
+            } else {
+                if (notNull && !data[column] == null || data[column] == undefined) {
+                    res.status(400).json({ error: `Column ${column} cannot be NULL | CHECK column value` });
+                    return;
+                }
             }
         }
 
         // Get all the columns from columns list that have constraint_id = 2
         let notNullColumns = columns.filter((clm) => {
-            let notNull = clm.constraints.find((constraint) => { if (constraint.constraint_id == 2) { return true } else { return false } });
-            if (notNull) {
+            let notNull = clm.constraints.find((constraint) => { return constraint.constraint_id === 2; });
+            let autoIncrement = clm.constraints.find((constraint) => { return constraint.constraint_id === 1; });
+            if (!autoIncrement && notNull) {
                 return clm;
             }
         });
@@ -515,10 +546,12 @@ const validateColumnDataType = (dataType, data) => {
     * 2 - DOUBLE
     * 3 - STRING
     */
-
     if (dataType == 1) {
-        if (isNaN(data) || !Number.isInteger(data)) {
-            return false;
+        if (isNaN(data)) {
+            data = parseInt(data);
+            if (!Number.isInteger(data)) {
+                return false;
+            }
         }
     }
     else if (dataType == 2) {
