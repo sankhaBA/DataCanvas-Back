@@ -10,7 +10,6 @@ router.get('/', (req, res) => {
         if (project_id) {  // if project_id parameter is available
             DeviceController.getDevicesByProjectId(project_id, res);
         } else {  // If project_id parameter is not available
-            console.log("no project_id");
             res.status(400).json({ message: 'Bad Request' });
         }
     } catch (error) {
@@ -28,7 +27,6 @@ router.get('/:deviceId', (req, res) => {
         if (deviceId && !isNaN(deviceId)) {  // if deviceId parameter is available
             DeviceController.getDeviceById(deviceId, res);
         } else {  // If deviceId parameter is not available
-            console.log("no deviceId");
             res.status(400).json({ message: 'Bad Request' });
         }
     } catch (error) {
@@ -46,7 +44,6 @@ router.get('/fingerprint/:deviceFingerprint', (req, res) => {
         if (deviceFingerprint) {  // if deviceFingerprint parameter is available
             DeviceController.getDeviceByFingerprint(deviceFingerprint, res);
         } else {  // If deviceFingerprint parameter is not available
-            console.log("no deviceFingerprint");
             res.status(400).json({ message: 'Bad Request' });
         }
     } catch (error) {
@@ -78,7 +75,6 @@ router.put('/', (req, res) => {
         if (device_id && device_name && device_name != "") {
             DeviceController.updateDeviceById(req, res);
         } else {
-            console.log("no device_id");
             res.status(400).json({ message: 'Bad Request' });
         }
     } catch (error) {
@@ -95,7 +91,6 @@ router.delete('/', (req, res) => {
         if (device_id) {  // if deviceId parameter is available
             DeviceController.deleteDeviceById(device_id, res);
         } else {  // If deviceId parameter is not available     
-            console.log("no deviceId");
             res.status(400).json({ message: 'Bad Request' });
         }
     } catch (error) {

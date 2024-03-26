@@ -11,7 +11,6 @@ router.get('/', (req, res) => {
         if (email) {  // if email parameter is available, send user details related to that email
             UserController.getUsersByEmail(email, res);
         } else {  // If email parameter is not available, send all users
-            console.log("no email");
             UserController.getAllUsers(res);
         }
     } catch (error) {
@@ -42,7 +41,6 @@ router.put('/', (req, res) => {
         if (email) {  // if email parameter is available
             UserController.updateUserByEmail(req, res);
         } else { // if email parameter is not available
-            console.log("no email");
             res.status(400).json({ message: 'Bad Request' });
         }
     } catch (error) {
@@ -58,7 +56,6 @@ router.delete('/', (req, res) => {
         if (email) {  // if email parameter is available, send user details related to that email
             UserController.deleteUserByEmail(email, res);
         } else {
-            console.log("no email");
             res.status(400).json({ message: 'Bad Request' });
         }
     } catch (error) {

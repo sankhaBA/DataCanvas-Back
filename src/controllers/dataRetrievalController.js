@@ -6,8 +6,6 @@ const getAllDataOfATable = async (req, res) => {
 
     const tableName = 'datatable_' + tbl_id;
 
-    console.log('tbl_id:', tbl_id);
-
     try {
         const table = await Table.findByPk(tbl_id);
         if (!table) {

@@ -240,7 +240,6 @@ async function updateColumnById(req, res) {
         if (column.clm_name != clm_name) {
           const [results, metadata] = await sequelize.query(renameQuery);
           renameSuccessful = true;
-          console.log('Rename successful');
         }
 
         const [results2, metadata2] = await sequelize.query(query);
@@ -249,7 +248,6 @@ async function updateColumnById(req, res) {
         // Rollback the column update
         await Column.update({ clm_name: column.clm_name, default_value: column.default_value, max_length: column.max_length }, { where: { clm_id } });
         if (renameSuccessful) {
-          console.log('Rollbacking column name change');
           let query = `ALTER TABLE "iot-on-earth-public"."datatable_${column.tbl_id}" RENAME COLUMN ${clm_name} TO ${column.clm_name};`;
           const [results, metadata] = sequelize.query
         }

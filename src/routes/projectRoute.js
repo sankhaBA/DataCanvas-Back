@@ -10,7 +10,6 @@ router.get('/', (req, res) => {
         if (user_id) {  // if user_id parameter is available, send project details related to that user_id
             ProjectController.getProjectsByUserId(user_id, res);
         } else {  // If user_id parameter is not available, send all projects
-            console.log("no user_id");
             res.status(400).json({ message: 'Bad Request' });
         }
     } catch (error) {
@@ -27,7 +26,6 @@ router.get('/:projectId', (req, res) => {
         if (projectId && !isNaN(projectId)) {  // if projectId parameter is available, send project details related to that projectId
             ProjectController.getProjectById(projectId, res);
         } else {  // If projectId parameter is not available, send all projects
-            console.log("no projectId");
             res.status(400).json({ message: 'Bad Request' });
         }
     } catch (error) {
@@ -58,7 +56,6 @@ router.put('/', (req, res) => {
         if (project_id && project_name && project_name != "") {  // if projectId parameter is available
             ProjectController.updateProjectById(req, res);
         } else { // if projectId parameter is not available
-            console.log("no projectId");
             res.status(400).json({ message: 'Bad Request' });
         }
     } catch (error) {
@@ -75,7 +72,6 @@ router.delete('/', (req, res) => {
         if (project_id) {  // if projectId parameter is available, send project details related to that projectId
             ProjectController.deleteProjectById(project_id, res);
         } else {
-            console.log("no projectId");
             res.status(400).json({ message: 'Bad Request' });
         }
     } catch (error) {

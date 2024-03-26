@@ -101,7 +101,6 @@ async function insertData(req, res) {
             }
 
             // Check data type of the value
-            console.log("DATA TYPE VALIDATION : ", foundColumn.clm_name, foundColumn.data_type, data[column]);
             if (!validateColumnDataType(foundColumn.data_type, data[column])) {
                 res.status(400).json({ error: `Data type of ${column} does not match | CHECK data type` });
                 return;
@@ -348,7 +347,7 @@ async function updateData(req, res) {
             * If available, check that the value is null
             * If null, send bad request with the appropriate message and return
         */
-        console.log("DATA SECTION : ", data);
+
         for (let clm of notNullColumns) {
             for (let column in data) {
                 if (clm.clm_name == column) {
@@ -358,15 +357,6 @@ async function updateData(req, res) {
                     }
                 }
             }
-
-            // data.find((column) => {
-            //     if (clm.clm_name == column) {
-            //         if (data[clm.clm_name] == null || data[clm.clm_name] == undefined) {
-            //             res.status(400).json({ error: `Column ${clm.clm_name} cannot be NULL | CHECK column value` });
-            //             return;
-            //         }
-            //     }
-            // });
         }
 
         // Update data

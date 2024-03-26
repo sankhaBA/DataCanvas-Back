@@ -26,7 +26,6 @@ async function addDevice(req, res) {
     }
 
     try {
-        console.log("fingerprint: ", fingerprint);
         let device = await Device.create({ device_name, description, fingerprint, project_id });
         res.status(200).json(device);
     } catch (error) {
