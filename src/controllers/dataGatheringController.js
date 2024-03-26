@@ -354,15 +354,25 @@ async function updateData(req, res) {
             * If null, send bad request with the appropriate message and return
         */
 
+        console.log("DATA SECTION : ", data);
         for (let clm of notNullColumns) {
-            data.find((column) => {
+            for (let column in data) {
                 if (clm.clm_name == column) {
                     if (data[clm.clm_name] == null || data[clm.clm_name] == undefined) {
                         res.status(400).json({ error: `Column ${clm.clm_name} cannot be NULL | CHECK column value` });
                         return;
                     }
                 }
-            });
+            }
+
+            // data.find((column) => {
+            //     if (clm.clm_name == column) {
+            //         if (data[clm.clm_name] == null || data[clm.clm_name] == undefined) {
+            //             res.status(400).json({ error: `Column ${clm.clm_name} cannot be NULL | CHECK column value` });
+            //             return;
+            //         }
+            //     }
+            // });
         }
 
         // Update data
@@ -546,6 +556,10 @@ const validateColumnDataType = (dataType, data) => {
     * 2 - DOUBLE
     * 3 - STRING
     */
+    if (data == null || data == undefined) {
+        return true;
+    }
+
     if (dataType == 1) {
         if (isNaN(data)) {
             data = parseInt(data);

@@ -27,7 +27,7 @@ async function createTable(req, res) {
 
   // Check tbl_name already exists
   try {
-    let table = await Table.findOne({ where: { tbl_name } });
+    let table = await Table.findOne({ where: { tbl_name: tbl_name, project_id: project_id } });
 
     if (table) {
       res.status(409).json({ message: "Table name already exists" });

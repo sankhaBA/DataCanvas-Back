@@ -17,6 +17,13 @@ async function addColumn(req, res) {
       return;
     }
 
+    // Check for clm_name duplications for the table tbl_id
+    const columnExists = await Column.findOne({ where: { clm_name, tbl_id } });
+    if (columnExists) {
+      res.status(409).json({ message: 'Column name already exists' });
+      return;
+    }
+
     const column = await Column.create({ clm_name, data_type, tbl_id, default_value, max_length });
 
     if (column) {
@@ -193,6 +200,13 @@ async function updateColumnById(req, res) {
 
     if (data_type != column.data_type) {
       res.status(405).json({ error: 'Data type cannot be changed' });
+      return;
+    }
+
+    // Check for clm_name duplications for the table tbl_id
+    const columnExists = await Column.findOne({ where: { clm_name, tbl_id } });
+    if (columnExists) {
+      res.status(409).json({ message: 'Column name already exists' });
       return;
     }
 
