@@ -130,7 +130,7 @@ async function deleteAllDevicesByProjectId(project_id, res) {
         else {
             res.status(404).json({ message: "Devices not found" });
         }
-    } catch (erroe) {
+    } catch (error) {
         console.error('Error deleting devices :', error);
         res.status(500).json({ error: 'Failed to delete devices' })
     }
