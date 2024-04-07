@@ -2,6 +2,7 @@ const { DataTypes, Model } = require('sequelize');
 const sequelize = require('../../db');
 const Column = require('./columnModel');
 const Widget = require('./widgetModel');
+const Device = require('./deviceModel');
 
 class ParameterTableWidget extends Model { }
 
@@ -27,7 +28,15 @@ ParameterTableWidget.init({
             model: Column,
             key: 'clm_id'
         }
-    }
+    },
+    device: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        References: {
+            Model: Device,
+            key: 'device_id',
+        },
+    },
 }, {
     sequelize,
     modelName: 'ParameterTableWidget',

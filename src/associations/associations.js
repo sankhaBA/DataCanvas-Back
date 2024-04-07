@@ -1,3 +1,4 @@
+const Device = require('./../models/deviceModel');
 const Column = require('./../models/columnModel');
 const Constraint = require('./../models/constraintModel');
 const ColumnConstraint = require('./../models/columnConstraintModel');
@@ -34,10 +35,18 @@ ChartSeries.belongsTo(Column, {
     foreignKey: 'chartseries_clm_id_fkey',
 });
 
+ChartSeries.belongsTo(Device, {
+    foreignKey: 'chartseries_device_id_fkey',
+});
+
 ParameterTableWidget.belongsTo(Widget, {
     foreignKey: 'parametertables_widget_id_fkey',
 });
 
 ParameterTableWidget.belongsTo(Column, {
     foreignKey: 'parametertables_clm_id_fkey',
+});
+
+ParameterTableWidget.belongsTo(Device, {
+    foreignKey: 'parametertables_device_id_fkey',
 });
