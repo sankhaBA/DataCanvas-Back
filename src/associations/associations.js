@@ -3,8 +3,9 @@ const Constraint = require('./../models/constraintModel');
 const ColumnConstraint = require('./../models/columnConstraintModel');
 const Widget = require('../models/widgetModel');
 const DataTable = require('../models/dataTableModel');
-const Chart = require('../models/chartModel');
+const ChartWidget = require('../models/chartWidgetModel');
 const ChartSeries = require('../models/chartSeriesModel');
+const ParameterTableWidget = require('../models/parameterTableWidgetModel');
 
 // Set up associations after all models are defined
 console.log('Setting up associations...');
@@ -17,18 +18,26 @@ Widget.belongsTo(DataTable, {
     foreignKey: 'widgets_dataset_fkey',
 });
 
-Chart.belongsTo(Widget, {
+ChartWidget.belongsTo(Widget, {
     foreignKey: 'charts_widget_fkey',
 });
 
-Chart.belongsTo(Column, {
+ChartWidget.belongsTo(Column, {
     foreignKey: 'charts_x_axis_fkey',
 });
 
-ChartSeries.belongsTo(Chart, {
+ChartSeries.belongsTo(ChartWidget, {
     foreignKey: 'chartseries_chart_id_fkey',
 });
 
 ChartSeries.belongsTo(Column, {
     foreignKey: 'chartseries_clm_id_fkey',
+});
+
+ParameterTableWidget.belongsTo(Widget, {
+    foreignKey: 'parametertables_widget_id_fkey',
+});
+
+ParameterTableWidget.belongsTo(Column, {
+    foreignKey: 'parametertables_clm_id_fkey',
 });

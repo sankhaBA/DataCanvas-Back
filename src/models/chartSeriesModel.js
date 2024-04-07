@@ -1,6 +1,6 @@
 const { DataTypes, Model } = require('sequelize');
 const sequelize = require('./../../db'); // Import the Sequelize instance
-const Chart = require('./chartModel');
+const ChartWidget = require('./chartWidgetModel');
 const Column = require('./columnModel');
 
 class ChartSeries extends Model { }
@@ -17,7 +17,7 @@ ChartSeries.init(
             type: DataTypes.INTEGER,
             allowNull: false,
             References: {
-                Model: Chart,
+                Model: ChartWidget,
                 key: 'chart_id',
             },
         },
