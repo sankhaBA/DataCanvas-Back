@@ -148,7 +148,7 @@ CREATE TABLE IF NOT EXISTS "iot-on-earth-public".charts
 (
     id integer NOT NULL DEFAULT nextval('"iot-on-earth-public".variations_id_seq'::regclass),
     widget_id integer NOT NULL,
-    x_axis integer NOT NULL,
+    x_axis integer,
     chart_type integer NOT NULL,
     CONSTRAINT charts_pkey PRIMARY KEY (id),
     CONSTRAINT charts_widget_fkey FOREIGN KEY (widget_id)
@@ -165,9 +165,9 @@ CREATE TABLE IF NOT EXISTS "iot-on-earth-public".chartseries
 (
     id integer NOT NULL DEFAULT nextval('"iot-on-earth-public".variationseries_id_seq'::regclass),
     chart_id integer NOT NULL,
-    clm_id integer NOT NULL,
+    clm_id integer,
     device_id integer,
-    series_name character varying(50)[] COLLATE pg_catalog."default" NOT NULL,
+    series_name character varying(50) COLLATE pg_catalog."default" NOT NULL,
     CONSTRAINT chartseries_pkey PRIMARY KEY (id),
     CONSTRAINT chartseries_chart_id_fkey FOREIGN KEY (chart_id)
         REFERENCES "iot-on-earth-public".charts (id) MATCH SIMPLE

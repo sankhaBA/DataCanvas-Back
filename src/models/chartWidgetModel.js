@@ -27,7 +27,6 @@ ChartWidget.init(
         },
         x_axis: {
             type: DataTypes.INTEGER,
-            allowNull: false,
             References: {
                 Model: Column,
                 key: 'clm_id',

@@ -40,7 +40,7 @@ ParameterTableWidget.init({
     sequelize,
     modelName: 'ParameterTableWidget',
     schema: 'iot-on-earth-public',
-    tableName: 'paremetertables',
+    tableName: 'parametertables',
     timestamps: false,
     underscored: true
 });

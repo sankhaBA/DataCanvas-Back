@@ -17,9 +17,6 @@ ChartSeries.init(
         series_name: {
             type: DataTypes.STRING,
             allowNull: false,
-            validate: {
-                len: [1, 50],
-            },
         },
         chart_id: {
             type: DataTypes.INTEGER,

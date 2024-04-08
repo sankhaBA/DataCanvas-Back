@@ -24,12 +24,12 @@ const sequelize = require("../../db");
     * CONFIGURATION FOR CHARTS
     *  "configuration": {
     *       "chart_type": 1,
-    *      "x_axis": <clm_id from Column>,
+    *      "x_axis": <clm_id from Column> or null for no x-axis, null for timestamp (created_at) column
     *      "series": [
     *         {
     *              "series_name": "Series Name",
     *              "clm_id": <clm_id from Column>
-    *              "device_id": <device_id from Device> or null for all devices,
+    *              "device_id": <device_id from Device> or null for all devices, 0 - for all devices
     *        },
     *        {
     *             ... (more series) ...
@@ -42,14 +42,14 @@ const sequelize = require("../../db");
     *    "columns": [
     *       <Array of clm_id from Column>
     *   ],
-    *   "device_id": <device_id from Device> or null for all devices
+    *   "device_id": <device_id from Device> or null for all devices, 0 - for all devices
     * }
     * -----------------------------------------------------------------
     * CONFIGURATION FOR TOGGLES
     * "configuration": {
     *   "clm_id": <clm_id from Column>,
     *   "write_enabled": true
-    *   "device_id": <device_id from Device> or null for all devices
+    *   "device_id": <device_id from Device> or null for all devices, 0 - for all devices
     * }
     * -----------------------------------------------------------------
     * CONFIGURATION FOR GAUGES
@@ -57,7 +57,7 @@ const sequelize = require("../../db");
     *  "clm_id": <clm_id from Column>,
     *  "max_value": 100,
     *  "gauge_type": 1 or 2,
-    *  "device_id": <device_id from Device> or null for all devices
+    *  "device_id": <device_id from Device> or null for all devices, 0 - for all devices
     * }
 */
 
@@ -267,7 +267,7 @@ async function validateConfiguration(widget_type, configuration) {
     * The clm_id and device should be valid
 */
 async function validateChartConfiguration(configuration) {
-    if (!configuration.chart_type || !configuration.x_axis || !configuration.series) {
+    if (!configuration.chart_type || !configuration.series) {
         console.log("SOMETHING MISSING")
         return false;
     }
@@ -283,9 +283,11 @@ async function validateChartConfiguration(configuration) {
     }
 
     // Check if x-axis is valid
-    if (await validateColumn(configuration.x_axis) == false) {
-        console.log("INVALID X AXIS")
-        return false;
+    if (configuration.x_axis != null) {
+        if (await validateColumn(configuration.x_axis) == false) {
+            console.log("INVALID X AXIS")
+            return false;
+        }
     }
 
     for (let i = 0; i < configuration.series.length; i++) {
