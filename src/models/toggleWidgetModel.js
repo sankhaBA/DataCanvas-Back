@@ -2,6 +2,7 @@ const { DataTypes, Model } = require('sequelize');
 const sequelize = require('../../db');
 const Column = require('./columnModel');
 const Widget = require('./widgetModel');
+const Device = require('./deviceModel');
 
 class ToggleWidget extends Model { }
 
@@ -31,6 +32,14 @@ ToggleWidget.init({
     write_enabled: {
         type: DataTypes.BOOLEAN,
         allowNull: false
+    },
+    device_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: Device,
+            key: 'device_id'
+        }
     }
 
 }, {
@@ -38,7 +47,7 @@ ToggleWidget.init({
     modelName: 'ToggleWidget',
     schema: 'iot-on-earth-public',
     tableName: 'toggles',
-    timestamps: true,
+    timestamps: false,
     underscored: true
 });
 

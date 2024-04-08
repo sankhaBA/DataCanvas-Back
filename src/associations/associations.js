@@ -1,3 +1,4 @@
+const Project = require('./../models/projectModel');
 const Device = require('./../models/deviceModel');
 const Column = require('./../models/columnModel');
 const Constraint = require('./../models/constraintModel');
@@ -7,6 +8,8 @@ const DataTable = require('../models/dataTableModel');
 const ChartWidget = require('../models/chartWidgetModel');
 const ChartSeries = require('../models/chartSeriesModel');
 const ParameterTableWidget = require('../models/parameterTableWidgetModel');
+const ToggleWidget = require('../models/toggleWidgetModel');
+const GaugeWidget = require('../models/gaugeWidgetModel');
 
 // Set up associations after all models are defined
 console.log('Setting up associations...');
@@ -16,37 +19,65 @@ ColumnConstraint.belongsTo(Constraint, { foreignKey: 'constraint_id' });
 Constraint.hasMany(ColumnConstraint, { foreignKey: 'constraint_id' });
 
 Widget.belongsTo(DataTable, {
-    foreignKey: 'widgets_dataset_fkey',
+    foreignKey: 'dataset',
+});
+
+Widget.belongsTo(Project, {
+    foreignKey: 'project_id',
 });
 
 ChartWidget.belongsTo(Widget, {
-    foreignKey: 'charts_widget_fkey',
+    foreignKey: 'widget_id',
 });
 
 ChartWidget.belongsTo(Column, {
-    foreignKey: 'charts_x_axis_fkey',
+    foreignKey: 'x_axis',
 });
 
 ChartSeries.belongsTo(ChartWidget, {
-    foreignKey: 'chartseries_chart_id_fkey',
+    foreignKey: 'chart_id',
 });
 
 ChartSeries.belongsTo(Column, {
-    foreignKey: 'chartseries_clm_id_fkey',
+    foreignKey: 'clm_id',
 });
 
 ChartSeries.belongsTo(Device, {
-    foreignKey: 'chartseries_device_id_fkey',
+    foreignKey: 'device_id',
 });
 
 ParameterTableWidget.belongsTo(Widget, {
-    foreignKey: 'parametertables_widget_id_fkey',
+    foreignKey: 'widget_id',
 });
 
 ParameterTableWidget.belongsTo(Column, {
-    foreignKey: 'parametertables_clm_id_fkey',
+    foreignKey: 'clm_id',
 });
 
 ParameterTableWidget.belongsTo(Device, {
-    foreignKey: 'parametertables_device_id_fkey',
+    foreignKey: 'device_id',
+});
+
+ToggleWidget.belongsTo(Widget, {
+    foreignKey: 'widget_id',
+});
+
+ToggleWidget.belongsTo(Column, {
+    foreignKey: 'clm_id',
+});
+
+ToggleWidget.belongsTo(Device, {
+    foreignKey: 'device_id',
+});
+
+GaugeWidget.belongsTo(Widget, {
+    foreignKey: 'widget_id',
+});
+
+GaugeWidget.belongsTo(Column, {
+    foreignKey: 'clm_id',
+});
+
+GaugeWidget.belongsTo(Device, {
+    foreignKey: 'device_id',
 });

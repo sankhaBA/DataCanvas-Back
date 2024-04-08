@@ -37,7 +37,7 @@ ChartSeries.init(
                 key: 'clm_id',
             },
         },
-        device: {
+        device_id: {
             type: DataTypes.INTEGER,
             allowNull: false,
             References: {
@@ -51,7 +51,7 @@ ChartSeries.init(
         modelName: 'ChartSeries', // Set the model name
         schema: 'iot-on-earth-public', // Set the schema name (if applicable)
         tableName: 'chartseries', // Set the table name explicitly (optional)
-        timestamps: true, // Enable timestamps (createdAt, updatedAt)
+        timestamps: false, // Enable timestamps (createdAt, updatedAt)
         underscored: true, // Use snake_case for column names
     }
 );

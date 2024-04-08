@@ -29,7 +29,7 @@ ParameterTableWidget.init({
             key: 'clm_id'
         }
     },
-    device: {
+    device_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         References: {
@@ -42,7 +42,7 @@ ParameterTableWidget.init({
     modelName: 'ParameterTableWidget',
     schema: 'iot-on-earth-public',
     tableName: 'paremetertables',
-    timestamps: true,
+    timestamps: false,
     underscored: true
 });
 

@@ -2,6 +2,7 @@ const { DataTypes, Model } = require('sequelize');
 const sequelize = require('../../db');
 const Column = require('./columnModel');
 const Widget = require('./widgetModel');
+const Device = require('./deviceModel');
 
 class GaugeWidget extends Model { }
 
@@ -33,15 +34,23 @@ GaugeWidget.init({
         allowNull: false,
     },
     gauge_type: {
-        type: DataTypes.INTEGER, // 0 for linear, 1 for radial
+        type: DataTypes.INTEGER, // 1 for radial, 2 for linear
         allowNull: false,
+    },
+    device_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: Device,
+            key: 'device_id'
+        }
     }
 }, {
     sequelize,
     modelName: 'GaugeWidget',
     schema: 'iot-on-earth-public',
-    tableName: 'toggles',
-    timestamps: true,
+    tableName: 'gauges',
+    timestamps: false,
     underscored: true
 });
 
