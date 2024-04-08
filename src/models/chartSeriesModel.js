@@ -39,7 +39,6 @@ ChartSeries.init(
         },
         device_id: {
             type: DataTypes.INTEGER,
-            allowNull: false,
             References: {
                 Model: Device,
                 key: 'device_id',

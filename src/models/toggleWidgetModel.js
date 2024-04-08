@@ -35,7 +35,6 @@ ToggleWidget.init({
     },
     device_id: {
         type: DataTypes.INTEGER,
-        allowNull: false,
         references: {
             model: Device,
             key: 'device_id'

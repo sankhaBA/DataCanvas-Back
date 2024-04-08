@@ -129,7 +129,7 @@ async function createWidget(req, res) {
 
     // Validate configuration
     try {
-        if (!validateConfiguration(widget_type, configuration)) {
+        if (await validateConfiguration(widget_type, configuration) == false) {
             res.status(400).json({ message: "Invalid configuration" });
             return;
         }
@@ -243,13 +243,13 @@ async function deleteWidgetById(widget_id, res) {
     * The configuration object should be validated based on the widget type
     * The configuration object should have all required fields for the widget type
 */
-function validateConfiguration(widget_type, configuration) {
+async function validateConfiguration(widget_type, configuration) {
     if (widget_type == 1) {
         return validateChartConfiguration(configuration);
     } else if (widget_type == 2) {
         return validateParameterTableConfiguration(configuration);
     } else if (widget_type == 3) {
-        return validateToggleConfiguration(configuration);
+        return await validateToggleConfiguration(configuration);
     } else if (widget_type == 4) {
         return validateGaugeConfiguration(configuration);
     }
