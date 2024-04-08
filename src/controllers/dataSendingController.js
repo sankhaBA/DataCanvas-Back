@@ -1,5 +1,5 @@
 const Table = require("../models/dataTableModel");
-const sequelize = require("./../../db");
+const sequelize = require("../../db");
 
 const getAllDataOfATable = async (req, res) => {
     const { tbl_id, offset, limit } = req.query;

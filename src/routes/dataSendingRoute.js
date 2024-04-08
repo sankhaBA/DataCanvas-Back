@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const DataRetrievalController = require('../controllers/dataRetrievalController');
+const DataSendingController = require('../controllers/dataSendingController');
 
 // Get request to retrieve all data of a table with offset and limit
 router.get('/all/', (req, res) => {
     const { tbl_id } = req.query;
     try {
         if (tbl_id) {
-            DataRetrievalController.getAllDataOfATable(req, res);
+            DataSendingController.getAllDataOfATable(req, res);
         } else {
             res.status(400).json({ error: 'Bad Request | CHECK table | Request validation unsuccessful' });
         }
@@ -22,7 +22,7 @@ router.get('/count/', (req, res) => {
     const { tbl_id } = req.query;
     try {
         if (tbl_id) {
-            DataRetrievalController.getCountOfTable(tbl_id, res);
+            DataSendingController.getCountOfTable(tbl_id, res);
         } else {
             res.status(400).json({ error: 'Bad Request | CHECK table | Request validation unsuccessful' });
         }
@@ -39,7 +39,7 @@ router.get('/count/project/', (req, res) => {
 
     try {
         if (project_id) {
-            DataRetrievalController.getRecordCountOfProject(project_id, res);
+            DataSendingController.getRecordCountOfProject(project_id, res);
         } else {
             res.status(400).json({ error: 'Bad Request | CHECK project | Request validation unsuccessful' });
         }
@@ -55,7 +55,7 @@ router.get('/latest/project/', (req, res) => {
 
     try {
         if (project_id) {
-            DataRetrievalController.getLatestTimestampOfProject(project_id, res);
+            DataSendingController.getLatestTimestampOfProject(project_id, res);
         } else {
             res.status(400).json({ error: 'Bad Request | CHECK project | Request validation unsuccessful' });
         }
