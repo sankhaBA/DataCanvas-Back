@@ -4,9 +4,9 @@ const Column = require('./columnModel');
 const Widget = require('./widgetModel');
 const Device = require('./deviceModel');
 
-class ToggleWidget extends Model { }
+class GaugeWidget extends Model { }
 
-ToggleWidget.init({
+GaugeWidget.init({
     id: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -29,9 +29,13 @@ ToggleWidget.init({
             key: 'clm_id'
         }
     },
-    write_enabled: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false
+    max_value: {
+        type: DataTypes.DOUBLE,
+        allowNull: false,
+    },
+    gauge_type: {
+        type: DataTypes.INTEGER, // 1 for radial, 2 for linear
+        allowNull: false,
     },
     device_id: {
         type: DataTypes.INTEGER,
@@ -40,14 +44,13 @@ ToggleWidget.init({
             key: 'device_id'
         }
     }
-
 }, {
     sequelize,
-    modelName: 'ToggleWidget',
+    modelName: 'GaugeWidget',
     schema: 'iot-on-earth-public',
-    tableName: 'toggles',
+    tableName: 'gauges',
     timestamps: false,
     underscored: true
 });
 
-module.exports = ToggleWidget; 
+module.exports = GaugeWidget; 

@@ -4,9 +4,9 @@ const Column = require('./columnModel');
 const Widget = require('./widgetModel');
 const Device = require('./deviceModel');
 
-class ToggleWidget extends Model { }
+class ParameterTableWidget extends Model { }
 
-ToggleWidget.init({
+ParameterTableWidget.init({
     id: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -29,25 +29,20 @@ ToggleWidget.init({
             key: 'clm_id'
         }
     },
-    write_enabled: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false
-    },
     device_id: {
         type: DataTypes.INTEGER,
-        references: {
-            model: Device,
-            key: 'device_id'
-        }
-    }
-
+        References: {
+            Model: Device,
+            key: 'device_id',
+        },
+    },
 }, {
     sequelize,
-    modelName: 'ToggleWidget',
+    modelName: 'ParameterTableWidget',
     schema: 'iot-on-earth-public',
-    tableName: 'toggles',
+    tableName: 'parametertables',
     timestamps: false,
     underscored: true
 });
 
-module.exports = ToggleWidget; 
+module.exports = ParameterTableWidget; 

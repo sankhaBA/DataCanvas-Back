@@ -1,5 +1,5 @@
 const Table = require("../models/dataTableModel");
-const sequelize = require("./../../db");
+const sequelize = require("../../db");
 
 const getAllDataOfATable = async (req, res) => {
     const { tbl_id, offset, limit } = req.query;
@@ -101,6 +101,11 @@ const getLatestTimestampOfProject = async (project_id, res) => {
 
             let sql = `SELECT MAX(updated_at) FROM "iot-on-earth-public"."datatable_${table.tbl_id}"`;
             const data = await sequelize.query(sql);
+
+            if (data[0][0].max === null) {
+                continue;
+            }
+
             const currentTimestamp = data[0][0].max;
 
             timestamp = new Date(Math.max(
@@ -109,6 +114,9 @@ const getLatestTimestampOfProject = async (project_id, res) => {
             ));
         }
 
+        if (timestamp === null || timestamp == '') {
+            return res.status(404).json({ timestamp: null });
+        }
         // Convert timestamp to Sri lanka time zone. timestamp is in GMT time
         timestamp = new Date(timestamp);
         timestamp.setHours(timestamp.getHours() + 5);

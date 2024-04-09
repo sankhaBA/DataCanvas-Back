@@ -1,7 +1,8 @@
 const { DataTypes, Model } = require('sequelize');
 const sequelize = require('./../../db'); // Import the Sequelize instance
-const Chart = require('./chartModel');
+const ChartWidget = require('./chartWidgetModel');
 const Column = require('./columnModel');
+const Device = require('./deviceModel');
 
 class ChartSeries extends Model { }
 
@@ -13,11 +14,15 @@ ChartSeries.init(
             primaryKey: true,
             autoIncrement: true,
         },
+        series_name: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
         chart_id: {
             type: DataTypes.INTEGER,
             allowNull: false,
             References: {
-                Model: Chart,
+                Model: ChartWidget,
                 key: 'chart_id',
             },
         },
@@ -29,13 +34,20 @@ ChartSeries.init(
                 key: 'clm_id',
             },
         },
+        device_id: {
+            type: DataTypes.INTEGER,
+            References: {
+                Model: Device,
+                key: 'device_id',
+            },
+        },
     },
     {
         sequelize, // Pass the initialized Sequelize instance
         modelName: 'ChartSeries', // Set the model name
         schema: 'iot-on-earth-public', // Set the schema name (if applicable)
         tableName: 'chartseries', // Set the table name explicitly (optional)
-        timestamps: true, // Enable timestamps (createdAt, updatedAt)
+        timestamps: false, // Enable timestamps (createdAt, updatedAt)
         underscored: true, // Use snake_case for column names
     }
 );
