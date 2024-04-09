@@ -184,7 +184,7 @@ async function getColumnById(clm_id, res) {
 
 //update the column by its ID
 async function updateColumnById(req, res) {
-  const { clm_id, clm_name, data_type, default_value, max_length } = req.body;
+  const { clm_id, clm_name, data_type, default_value, max_length, tbl_id } = req.body;
 
   try {
     const column = await Column.findByPk(clm_id);

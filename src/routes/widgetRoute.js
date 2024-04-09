@@ -23,11 +23,23 @@ router.get('/:widget_id', (req, res) => {
     * Creates a new widget
 */
 router.post('/', (req, res) => {
-    const widget = req.body;
+    let { widget_name, widget_type, dataset, project_id, configuration } = req.body;
+
+    if (!widget_name || !widget_type || !dataset || !project_id || !configuration) {
+        res.status(400).json({ message: "Missing required fields" });
+        return;
+    }
+
+    widget_type = parseInt(widget_type);
+    if (widget_type < 1 || widget_type > 4) {
+        res.status(400).json({ message: "Invalid widget type" });
+        return;
+    }
     try {
         WidgetController.createWidget(req, res);
     } catch (err) {
         console.log(err);
+        res.status(500).json({ message: "Failed to create widget" });
     }
 });
 

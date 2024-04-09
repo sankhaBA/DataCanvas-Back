@@ -98,17 +98,6 @@ async function getWidgetById(widget_id, res) {
 async function createWidget(req, res) {
     let { widget_name, widget_type, dataset, project_id, configuration } = req.body;
 
-    if (!widget_name || !widget_type || !dataset || !project_id || !configuration) {
-        res.status(400).json({ message: "Missing required fields" });
-        return;
-    }
-
-    widget_type = parseInt(widget_type);
-    if (widget_type < 1 || widget_type > 4) {
-        res.status(400).json({ message: "Invalid widget type" });
-        return;
-    }
-
     // Check if project exists and data table exists
     try {
         const project = await Project.findByPk(project_id);
