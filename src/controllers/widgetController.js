@@ -209,7 +209,133 @@ async function createWidget(req, res) {
     * @throws {Error} - Throws an error (500) if there is a server error
 */
 async function updateWidgetById(req, res) {
+    const widget_id = req.params.widget_id;
+    let { widget_name, widget_type, dataset, project_id, configuration } = req.body;
 
+    // Check if widget exists
+    try {
+        const widget = await Widget.findByPk(widget_id);
+        if (!widget) {
+            res.status(404).json({ message: "Widget not found" });
+            return;
+        }
+    } catch (error) {
+        res.status(500).json({ message: "Server error" });
+        return;
+    }
+
+    // Validate configuration
+    try {
+        if (await validateConfiguration(widget_type, configuration) == false) {
+            res.status(400).json({ message: "Invalid configuration" });
+            return;
+        }
+    } catch (error) {
+        res.status(500).json({ message: "Server error" });
+        return;
+    }
+
+    /*
+        * START UPDATING THE WIDGET AND ITS CONFIGURATION
+        * Update the widget object and its configuration in the database
+        * Use Sequelize transactions to ensure that the widget and its configuration are updated together
+    */
+
+    try {
+        const updated_widget = await sequelize.transaction(async (t) => {
+            await Widget.update({
+                widget_name,
+                widget_type,
+                dataset,
+                project_id,
+            }, {
+                where: {
+                    id: widget_id
+                },
+                transaction: t
+            });
+
+            /*
+                * Update widget configuration
+            */
+            if (widget_type == 1) {
+                await ChartWidget.update({
+                    chart_type: configuration.chart_type,
+                    x_axis: configuration.x_axis,
+                }, {
+                    where: {
+                        widget_id: widget_id
+                    },
+                    transaction: t
+                });
+                // Delete existing series
+                await ChartSeries.destroy({
+                    where: {
+                        chart_id: widget_configuration.id
+                    },
+                    transaction: t
+                });
+
+                for (let i = 0; i < configuration.series.length; i++) {
+                    const series = configuration.series[i];
+                    await ChartSeries.create({
+                        chart_id: widget_configuration.id,
+                        series_name: series.series_name,
+                        clm_id: series.clm_id,
+                        device_id: series.device_id,
+                    }, { transaction: t });
+                }
+            } else if (widget_type == 2) {
+                // Delete existing columns
+                await ParameterTableWidget.destroy({
+                    where: {
+                        widget_id: widget_id
+                    },
+                    transaction: t
+                    
+                });
+
+                // Create new columns
+                for (let i = 0; i < configuration.columns.length; i++) {
+                    await ParameterTableWidget.create({
+                        widget_id: widget_id,
+                        clm_id: configuration.columns[i],
+                        device_id: configuration.device_id,
+                    }, { transaction: t });
+                }
+
+            } else if (widget_type == 3) {
+                await ToggleWidget.update({
+                    clm_id: configuration.clm_id,
+                    write_enabled: configuration.write_enabled,
+                    device_id: configuration.device_id,
+                }, {
+                    where: {
+                        widget_id: widget_id
+                    },
+                    transaction: t
+                });
+            } else if (widget_type == 4) {
+                await GaugeWidget.update({
+                    clm_id: configuration.clm_id,
+                    max_value: configuration.max_value,
+                    gauge_type: configuration.gauge_type,
+                    device_id: configuration.device_id,
+                }, {
+                    where: {
+                        widget_id: widget_id
+                    },
+                    transaction: t
+                });
+            }
+            return await Widget.findByPk(widget_id, { transaction: t });
+        });
+
+        res.status(200).json(updated_widget);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Server error" });
+    }
 }
 
 /*
