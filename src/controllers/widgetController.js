@@ -326,7 +326,19 @@ async function updateWidgetById(req, res) {
     * @throws {Error} - Throws an error (500) if there is a server error
 */
 async function deleteWidgetById(widget_id, res) {
+    try {
+        const widget = await Widget.findByPk(widget_id);
+        if (!widget) {
+            res.status(404).json({ message: "Widget not found" });
+            return;
+        }
 
+        await widget.destroy();
+        res.status(200).json("Widget Deleted");
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Internal Server error" });
+    }
 }
 
 /*

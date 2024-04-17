@@ -79,7 +79,19 @@ router.put('/', (req, res) => {
     * Deletes a widget by id
 */
 router.delete('/', (req, res) => {
+    const widget_id = req.body.widget_id;
 
+    try {
+        if (!widget_id) {
+            res.status(400).json({ message: "Missing widget_id" });
+            return;
+        } else {
+            WidgetController.deleteWidgetById(widget_id, res);
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Failed to delete widget" });
+    }
 });
 
 module.exports = router;
