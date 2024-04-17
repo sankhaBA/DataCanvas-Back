@@ -67,6 +67,8 @@ async function addColumn(req, res) {
           if (max_length) {
             dataTypeString += `(${max_length})`;
           }
+        } else if (data_type == 4) {
+          dataTypeString = 'boolean';
         }
 
         // SET CONSTRAINTS
