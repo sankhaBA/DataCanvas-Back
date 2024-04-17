@@ -8,6 +8,17 @@ const WidgetController = require('../controllers/widgetController');
 */
 router.get('/', (req, res) => {
     const project_id = req.query.project_id;
+    try {
+        if (!project_id) {
+            res.status(400).json({ message: "Missing project_id" });
+            return;
+        } else {
+            WidgetController.getWidgetsByProject(project_id, res);
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Failed to get widgets" });
+    }
 });
 
 /*

@@ -70,7 +70,70 @@ const sequelize = require("../../db");
     * @throws {Error} - Throws an error (500) if there is a server error
 */
 async function getWidgetsByProject(project_id, res) {
+    try {
+        const project = await Project.findByPk(project_id);
+        if (!project) {
+            res.status(404).json({ message: "Project not found" });
+            return;
+        }
 
+        const widgets = await Widget.findAll({
+            where: {
+                project_id: project_id,
+            },
+            include: [{
+                model: DataTable,
+                attributes: ['tbl_name'],
+            }]
+        });
+
+        let configurations = [];
+        for (let widget of widgets) {
+            let configuration = {};
+            if (widget.widget_type == 1) {
+                const chart_widget = await ChartWidget.findOne({
+                    where: {
+                        widget_id: widget.id,
+                    },
+                    include: [{
+                        model: ChartSeries,
+                    }]
+                });
+
+                configuration = chart_widget;
+            } else if (widget.widget_type == 2) {
+                const parameter_table_widget = await ParameterTableWidget.findAll({
+                    where: {
+                        widget_id: widget.id,
+                    },
+                });
+
+                configuration = parameter_table_widget;
+            } else if (widget.widget_type == 3) {
+                const toggle_widget = await ToggleWidget.findOne({
+                    where: {
+                        widget_id: widget.id,
+                    },
+                });
+
+                configuration = toggle_widget;
+            } else if (widget.widget_type == 4) {
+                const gauge_widget = await GaugeWidget.findOne({
+                    where: {
+                        widget_id: widget.id,
+                    },
+                });
+
+                configuration = gauge_widget;
+            }
+            widget.setDataValue('configuration', configuration);
+        }
+
+        res.status(200).json(widgets);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Internal Server error" });
+    }
 }
 
 /*
