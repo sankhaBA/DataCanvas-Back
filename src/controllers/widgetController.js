@@ -146,7 +146,49 @@ async function getWidgetsByProject(project_id, res) {
     * @throws {Error} - Throws an error (500) if there is a server error
 */
 async function getWidgetById(widget_id, res) {
+    try {
+        const widget = await Widget.findByPk(widget_id);
+        if (!widget) {
+            res.status(404).json({ message: "Widget not found" });
+            return;
+        }
 
+        let configuration = {};
+        if (widget.widget_type == 1) {
+            configuration = await ChartWidget.findOne({
+                where: {
+                    widget_id: widget_id,
+                },
+                include: [{
+                    model: ChartSeries,
+                }]
+            });
+        } else if (widget.widget_type == 2) {
+            configuration = await ParameterTableWidget.findAll({
+                where: {
+                    widget_id: widget_id,
+                },
+            });
+        } else if (widget.widget_type == 3) {
+            configuration = await ToggleWidget.findOne({
+                where: {
+                    widget_id: widget_id,
+                },
+            });
+        } else if (widget.widget_type == 4) {
+            configuration = await GaugeWidget.findOne({
+                where: {
+                    widget_id: widget_id,
+                },
+            });
+        }
+
+        widget.setDataValue('configuration', configuration);
+        res.status(200).json(widget);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Internal Server error" });
+    }
 }
 
 /*

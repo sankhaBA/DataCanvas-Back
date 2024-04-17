@@ -27,6 +27,18 @@ router.get('/', (req, res) => {
 */
 router.get('/:widget_id', (req, res) => {
     const widget_id = req.params.widget_id;
+
+    try {
+        if (!widget_id) {
+            res.status(400).json({ message: "Missing widget_id" });
+            return;
+        } else {
+            WidgetController.getWidgetById(widget_id, res);
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Failed to get widget" });
+    }
 });
 
 /*
