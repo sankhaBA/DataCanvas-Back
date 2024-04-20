@@ -286,6 +286,7 @@ async function createWidget(req, res) {
                 widget_configuration = await GaugeWidget.create({
                     widget_id: new_widget.id,
                     clm_id: configuration.clm_id,
+                    min_value: configuration.min_value,
                     max_value: configuration.max_value,
                     gauge_type: configuration.gauge_type,
                     device_id: configuration.device_id,
@@ -296,7 +297,7 @@ async function createWidget(req, res) {
             return new_widget;
         });
 
-        res.status(201).json(widget);
+        res.status(200).json(widget);
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "Server error" });
@@ -422,6 +423,7 @@ async function updateWidgetById(req, res) {
             } else if (widget_type == 4) {
                 await GaugeWidget.update({
                     clm_id: configuration.clm_id,
+                    min_value: configuration.min_value,
                     max_value: configuration.max_value,
                     gauge_type: configuration.gauge_type,
                     device_id: configuration.device_id,
