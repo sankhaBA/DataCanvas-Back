@@ -142,6 +142,41 @@ const getLatestTimestampOfProject = async (project_id, res) => {
 }
 
 /*
+    * Search function for the search functionality in front end
+    * Search in :
+        ** Projects by project_name belongs to the specific user
+        ** Devices by device_name belongs to the projects of the specific user
+        ** DataTables by the tbl_name belongs to the projects of the specific user
+        ** Widgets by the widget_name belongs to the projects of the specific user
+    * Load all projects of the specific user in order to search in other models
+    * Search in each model and return the results as the following object :
+    * {
+    *   projects: [
+    *       {
+    *           project_id: 1,
+    *           project_name: 'Project 1',
+    *       },
+    *       // More projects
+    *   ],
+    *   devices: [
+    *       {
+    *           device_id: 1,
+    *           device_name: 'Device 1',
+    *       },
+    *       // More devices
+    *   ],
+    *   datatables: [// like above],
+    *   widgets: [// like above]
+    * }
+    * When searching through models, filter queries by selecting the id and name of each model as filtering attributes to reduce the load time
+    * If any error occurs, send a 500 response
+    * If there are no results, send the object in above structure with a 200 response
+*/
+const searchWholeProject = async (search_keyword, user_id, res) => {
+
+}
+
+/*
     * Get data for a toggle widget
     * Load Widget Details Including its Configuration  (Refer getWidgetByID function in widgetController)
     * If the widget is not available, send a 404 Not Found error and return

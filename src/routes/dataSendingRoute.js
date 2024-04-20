@@ -66,6 +66,16 @@ router.get('/latest/project/', (req, res) => {
 })
 
 /*
+    * Get request for the search function in front end
+    * search_keyword and user_id is sent as a query parameter
+    * Call searchWholeProject function of DataSendingController by passing the search_keyword, user_id and res as parameters
+*/
+router.get('/search/', (req, res) => {
+    const { search_keyword, user_id } = req.query;
+
+})
+
+/*
     * Get request retrieve data of a selected toggle widget
     * API Endpoint : <root>/api/data/get/toggle/<widget_id>
     * Validate whether the widget_id == null
