@@ -29,6 +29,10 @@ GaugeWidget.init({
             key: 'clm_id'
         }
     },
+    min_value: {
+        type: DataTypes.DOUBLE,
+        allowNull: false,
+    },
     max_value: {
         type: DataTypes.DOUBLE,
         allowNull: false,

@@ -202,7 +202,6 @@ async function getWidgetById(widget_id, res) {
 */
 async function createWidget(req, res) {
     let { widget_name, widget_type, dataset, project_id, configuration } = req.body;
-
     // Check if project exists and data table exists
     try {
         const project = await Project.findByPk(project_id);
