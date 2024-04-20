@@ -386,7 +386,7 @@ async function validateConfiguration(widget_type, configuration) {
     * The clm_id and device should be valid
 */
 async function validateChartConfiguration(configuration) {
-    if (!configuration.chart_type || !configuration.series) {
+    if (configuration.chart_type == null || configuration.series == null) {
         console.log("SOMETHING MISSING")
         return false;
     }
@@ -411,7 +411,7 @@ async function validateChartConfiguration(configuration) {
 
     for (let i = 0; i < configuration.series.length; i++) {
         const series = configuration.series[i];
-        if (!series.series_name || !series.clm_id) {
+        if (series.series_name == null || series.clm_id == null) {
             console.log("SERIES MISSING")
             return false;
         }
@@ -443,7 +443,7 @@ async function validateChartConfiguration(configuration) {
     * The device should be valid
 */
 async function validateParameterTableConfiguration(configuration) {
-    if (!configuration.columns) {
+    if (configuration.columns == null) {
         console.log("NO COLUMNS")
         return false;
     }
@@ -482,7 +482,8 @@ async function validateParameterTableConfiguration(configuration) {
     * The write_enabled should be a boolean
 */
 async function validateToggleConfiguration(configuration) {
-    if (!configuration.clm_id || !configuration.write_enabled) {
+    console.log(configuration.clm_id)
+    if (configuration.clm_id == null || configuration.write_enabled == null) {
         console.log("MISSING FIELDS")
         return false;
     }
@@ -515,7 +516,7 @@ async function validateToggleConfiguration(configuration) {
     * The gauge_type should be between 1 and 2
 */
 async function validateGaugeConfiguration(configuration) {
-    if (!configuration.clm_id || !configuration.max_value || !configuration.gauge_type) {
+    if (configuration.clm_id == null || configuration.max_value == null || configuration.gauge_type == null) {
         console.log("MISSING FIELDS")
         return false;
     }
