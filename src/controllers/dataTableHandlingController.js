@@ -150,6 +150,33 @@ async function truncateTable(tbl_id, res) {
   }
 }
 
+async function truncateAllTables(project_id, res) {
+  try {
+    const tables = await Table.findAll({ where: { project_id } });
+
+    if (tables.length == 0) {
+      res.status(404).json({ message: "Tables not found" });
+    }
+
+    await sequelize.transaction(async (t) => {
+      for (let i = 0; i < tables.length; i++) {
+        let sql = `TRUNCATE TABLE "iot-on-earth-public"."datatable_${tables[i].tbl_id}"`;
+        try {
+          let result = await sequelize.query(sql, { transaction: t });
+        } catch (error) {
+          console.error("Error truncating tables:", error);
+          throw error; // This will cause the transaction to be rolled back
+        }
+      }
+    });
+
+    res.status(200).json({ message: "All tables truncated successfully" });
+  } catch (error) {
+    console.error("Transaction rolled back due to error:", error);
+    res.status(500).json({ error: "Failed to truncate all tables" });
+  }
+}
+
 async function deleteTable(tbl_id, res) {
   try {
     const deletedTable = await Table.destroy({ where: { tbl_id } });
@@ -262,6 +289,7 @@ module.exports = {
   getTableById,
   updateTable,
   truncateTable,
+  truncateAllTables,
   deleteTable,
   deleteAllTable,
 };

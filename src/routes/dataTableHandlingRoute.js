@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const DataTableHandlingController = require('../controllers/dataTableHandlingController');
 
+// post request to create table
 router.post('/', (req, res) => {
     try {
         if (!req.body.tbl_name || !req.body.project_id) {
@@ -16,6 +17,7 @@ router.post('/', (req, res) => {
 }
 );
 
+// get request to get all tables
 router.get('/', (req, res) => {
     const project_id = req.query.project_id;
     try {
@@ -32,6 +34,7 @@ router.get('/', (req, res) => {
 }
 );
 
+// get request to get table by id
 router.get('/:tableId', (req, res) => {
     const tbl_id = req.params.tableId;
     try {
@@ -48,6 +51,7 @@ router.get('/:tableId', (req, res) => {
 }
 );
 
+// put request to update table
 router.put('/', (req, res) => {
     const { tbl_name, tbl_id } = req.body;
     try {
@@ -63,6 +67,7 @@ router.put('/', (req, res) => {
     }
 });
 
+// post request to truncate table
 router.post('/truncate/:tbl_id', (req, res) => {
     const tbl_id = req.params.tbl_id;
     try {
@@ -78,6 +83,23 @@ router.post('/truncate/:tbl_id', (req, res) => {
     }
 });
 
+// post request to truncate all tables
+router.post('/truncateall', (req, res) => {
+    const project_id = req.body.project_id;
+    try {
+        if (project_id) {
+            DataTableHandlingController.truncateAllTables(project_id, res);
+        } else {
+            res.status(400).json({ message: 'Bad Request' });
+        }
+    }
+    catch (error) {
+        console.error('Error truncating all tables', error);
+        res.status(500).json({ error: 'Failed to truncate all tables' });
+    }
+});
+
+// delete request to delete table
 router.delete('/', (req, res) => {
     const tbl_id = req.body.tbl_id;
     try {
@@ -93,6 +115,7 @@ router.delete('/', (req, res) => {
     }
 });
 
+// delete request to delete all tables
 router.delete('/all', (req, res) => {
     const project_id = req.body.project_id;
     try {
