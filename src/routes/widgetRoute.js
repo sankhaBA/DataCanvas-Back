@@ -47,9 +47,8 @@ router.post('/', (req, res) => {
     * PUT request for /api/widget/:widgetId
     * Updates a widget by id
 */
-router.put('/:widget_id', (req, res) => {
-    const widget_id = req.params.widget_id;
-    let { widget_name, widget_type, dataset, project_id, configuration } = req.body;
+router.put('/', (req, res) => {
+    let { widget_id, widget_name, widget_type, dataset, project_id, configuration } = req.body;
 
     if (!widget_name || !widget_type || !dataset || !project_id || !configuration) {
         res.status(400).json({ message: "Missing required fields" });

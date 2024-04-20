@@ -209,8 +209,7 @@ async function createWidget(req, res) {
     * @throws {Error} - Throws an error (500) if there is a server error
 */
 async function updateWidgetById(req, res) {
-    const widget_id = req.params.widget_id;
-    let { widget_name, widget_type, dataset, project_id, configuration } = req.body;
+    let { widget_id, widget_name, widget_type, dataset, project_id, configuration } = req.body;
 
     // Check if widget exists
     try {
@@ -259,19 +258,20 @@ async function updateWidgetById(req, res) {
                 * Update widget configuration
             */
             if (widget_type == 1) {
-                await ChartWidget.update({
+                const [rowsUpdate, [updatedChart]] = await ChartWidget.update({
                     chart_type: configuration.chart_type,
                     x_axis: configuration.x_axis,
                 }, {
                     where: {
                         widget_id: widget_id
                     },
+                    returning: true,
                     transaction: t
                 });
                 // Delete existing series
                 await ChartSeries.destroy({
                     where: {
-                        chart_id: widget_configuration.id
+                        chart_id: updatedChart.id
                     },
                     transaction: t
                 });
@@ -279,7 +279,7 @@ async function updateWidgetById(req, res) {
                 for (let i = 0; i < configuration.series.length; i++) {
                     const series = configuration.series[i];
                     await ChartSeries.create({
-                        chart_id: widget_configuration.id,
+                        chart_id: updatedChart.id,
                         series_name: series.series_name,
                         clm_id: series.clm_id,
                         device_id: series.device_id,
@@ -292,7 +292,6 @@ async function updateWidgetById(req, res) {
                         widget_id: widget_id
                     },
                     transaction: t
-                    
                 });
 
                 // Create new columns
@@ -328,10 +327,15 @@ async function updateWidgetById(req, res) {
                     transaction: t
                 });
             }
-            return await Widget.findByPk(widget_id, { transaction: t });
+            return true;
         });
 
-        res.status(200).json(updated_widget);
+        if (!updated_widget) {
+            res.status(500).json({ message: "Something Went Wrong" });
+            return;
+        } else {
+            res.status(200).json({ message: "Widget Updated" });
+        }
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "Server error" });
