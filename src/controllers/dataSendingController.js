@@ -169,10 +169,12 @@ const getLatestTimestampOfProject = async (project_id, res) => {
     *   widgets: [// like above]
     * }
     * When searching through models, filter queries by selecting the id and name of each model as filtering attributes to reduce the load time
+    * Make sure to get all valid results even the keyword is before, in the middle or after the name of the project/device/datatable/widget
+    * DO NOT RETRIEVE ALL DEVICES, DATATABLES, WIDGETS AND PROJECTS AND SEARCH IN THEM. USE FILTER QUERIES. LOAD PROJECTS ONLY TO KNOW WHICH PROJECTS ARE BELONGS TO THE USER TO SEARCH IN OTHER MODELS
     * If any error occurs, send a 500 response
     * If there are no results, send the object in above structure with a 200 response
 */
-const searchWholeProject = async (search_keyword, user_id, res) => {
+const searchWholeProject = async (keyword, user_id, res) => {
 
 }
 
