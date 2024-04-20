@@ -38,6 +38,10 @@ ChartSeries.belongsTo(ChartWidget, {
     foreignKey: 'chart_id',
 });
 
+ChartWidget.hasMany(ChartSeries, {
+    foreignKey: 'chart_id',
+});
+
 ChartSeries.belongsTo(Column, {
     foreignKey: 'clm_id',
 });
