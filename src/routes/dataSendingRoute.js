@@ -64,4 +64,55 @@ router.get('/latest/project/', (req, res) => {
         res.status(500).json({ message: 'Failed to retrieve data' });
     }
 })
+
+/*
+    * Get request retrieve data of a selected toggle widget
+    * API Endpoint : <root>/api/data/get/toggle/<widget_id>
+    * Validate whether the widget_id == null
+    * If null, send a 400 response with bad request error message
+    * If not, call getToggleData function of DataSendingController by passing widget_id and res as parameters
+*/
+router.get('/toggle/:widget_id', (req, res) => {
+    const { widget_id } = req.params;
+
+
+})
+
+/*
+    * Get request retrieve data of a selected gauge widget
+    * API Endpoint : <root>/api/data/get/gauge/<widget_id>
+    * Validate whether the widget_id == null
+    * If null, send a 400 response with bad request error message
+    * If not, call getGaugeData function of DataSendingController by passing widget_id and res as parameters
+*/
+router.get('/gauge/:widget_id', (req, res) => {
+    const { widget_id } = req.params;
+
+
+})
+
+/*
+    * Get request retrieve data of a selected table widget
+    * API Endpoint : <root>/api/data/get/table/<widget_id>
+    * Validate whether the widget_id == null
+    * If null, send a 400 response with bad request error message
+    * If not, call getParameterTableData function of DataSendingController by passing widget_id and res as parameters
+*/
+router.get('/table/:widget_id', (req, res) => {
+    const { widget_id } = req.params;
+
+})
+
+/*
+    * Get request retrieve data of a selected chart widget
+    * API Endpoint : <root>/api/data/get/chart/<widget_id>
+    * Validate whether the widget_id == null
+    * If null, send a 400 response with bad request error message
+    * If not, call getChartData function of DataSendingController by passing widget_id and res as parameters
+*/
+router.get('/chart/:widget_id', (req, res) => {
+    const { widget_id } = req.params;
+
+})
+
 module.exports = router;

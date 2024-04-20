@@ -1,4 +1,13 @@
 const Table = require("../models/dataTableModel");
+const Project = require("../models/projectModel");
+const Device = require("../models/deviceModel");
+const Column = require("../models/columnModel");
+const Widget = require("../models/widgetModel");
+const ChartWidget = require("../models/chartWidgetModel");
+const ChartSeries = require("../models/chartSeriesModel");
+const ParameterTableWidget = require("../models/parameterTableWidgetModel");
+const ToggleWidget = require("../models/toggleWidgetModel");
+const GaugeWidget = require("../models/gaugeWidgetModel");
 const sequelize = require("../../db");
 
 const getAllDataOfATable = async (req, res) => {
@@ -132,9 +141,68 @@ const getLatestTimestampOfProject = async (project_id, res) => {
     }
 }
 
+/*
+    * Get data for a toggle widget
+    * Load Widget Details Including its Configuration  (Refer getWidgetByID function in widgetController)
+    * If the widget is not available, send a 404 Not Found error and return
+    * Retrieve clm_name using Column model of the clm_id in widget configuration
+    * Get the latest record from the relevant table by generating the correct SQL query.
+    * SQL query details are as follows
+    * Table name : datatable_<dataset> from widget
+    * column : clm_name retrieved earlier
+    * where : filter by device_id in widget configuration
+    * Get only the latest record by sorting records by id
+    * Validate the value whether it is true or false. 
+    * If it is true or false, send data with a 200 response
+    * If not, send data with a 500 response
+    * Wrap all these things with a try-catch block and if any error ocurrs, send 500 response
+*/
+const getToggleData = async (widget_id, res) => {
+
+}
+
+/*
+    * Get data for a gauge  widget
+    * Load Widget Details Including its Configuration  (Refer getWidgetByID function in widgetController)
+    * If the widget is not available, send a 404 Not Found error and return
+    * Retrieve clm_name using Column model of the clm_id in widget configuration
+    * Get the latest record from the relevant table by generating the correct SQL query.
+    * SQL query details are as follows
+    * Table name : datatable_<dataset> from widget
+    * column : clm_name retrieved earlier
+    * where : filter by device_id in widget configuration
+    * Get only the latest record by sorting records by id
+    * Validate the value whether it is a number. 
+    * If it is a number, send data with a 200 response
+    * If not, send data with a 500 response
+    * Wrap all these things with a try-catch block and if any error ocurrs, send 500 response
+*/
+const getGaugeData = async (widget_id, res) => {
+
+}
+
+/*
+    * Function for loading data of parameter table widgets
+*/
+const getParameterTableData = async (widget_id, res) => {
+
+}
+
+/*
+    * Function for loading data of chart widgets
+*/
+const getChartData = async (widget_id, res) => {
+
+}
+
+
 module.exports = {
     getAllDataOfATable,
     getCountOfTable,
     getRecordCountOfProject,
-    getLatestTimestampOfProject
+    getLatestTimestampOfProject,
+    getToggleData,
+    getGaugeData,
+    getParameterTableData,
+    getChartData
 };
