@@ -29,7 +29,7 @@ router.get('/:widget_id', (req, res) => {
     const widget_id = req.params.widget_id;
 
     try {
-        if (!widget_id) {
+        if (widget_id == null) {
             res.status(400).json({ message: "Missing widget_id" });
             return;
         } else {
@@ -48,7 +48,7 @@ router.get('/:widget_id', (req, res) => {
 router.post('/', (req, res) => {
     let { widget_name, widget_type, dataset, project_id, configuration } = req.body;
 
-    if (!widget_name || !widget_type || !dataset || !project_id || !configuration) {
+    if (widget_name == null || widget_type == null || dataset == null || project_id == null || configuration == null) {
         res.status(400).json({ message: "Missing required fields" });
         return;
     }
@@ -73,7 +73,7 @@ router.post('/', (req, res) => {
 router.put('/', (req, res) => {
     let { widget_id, widget_name, widget_type, dataset, project_id, configuration } = req.body;
 
-    if (!widget_name || !widget_type || !dataset || !project_id || !configuration) {
+    if (widget_id == null || widget_name == null || widget_type == null || dataset == null || project_id == null || configuration == null) {
         res.status(400).json({ message: "Missing required fields" });
         return;
     }
@@ -100,7 +100,7 @@ router.delete('/', (req, res) => {
     const widget_id = req.body.widget_id;
 
     try {
-        if (!widget_id) {
+        if (widget_id == null) {
             res.status(400).json({ message: "Missing widget_id" });
             return;
         } else {
