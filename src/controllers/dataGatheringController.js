@@ -456,6 +456,24 @@ async function deleteData(req, res) {
     }
 }
 
+/*
+    * Extract widget_id and new_value from the request
+    * Check if the widget_id is valid and available
+    * Check if the new_value is valid true/false value
+    * Get the widget details as like in getToggleData
+    * Start a transaction and get the latest record from the relevant table with relevant filters
+    * Update the record with the new_value
+    * Commit the transaction
+    * Send the response
+    * If any error occurs, rollback the transaction and send the error response
+    * If the widget_id is not valid, send a 404 response with the appropriate message
+    * If the new_value is not valid, send a 400 response with the appropriate message
+    * If any other error occurs, send a 500 response with the appropriate message
+*/
+async function updateToggleState(req, res) {
+
+}
+
 // Check project_id is a valid and available project
 const validateProject = async (project_id) => {
     try {

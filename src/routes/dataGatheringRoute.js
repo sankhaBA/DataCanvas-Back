@@ -52,6 +52,20 @@ router.delete('/delete', (req, res) => {
     }
 });
 
+/*
+    * Update state of a toggle
+    * API Endpoint : <root>/api/data/feed/update/toggle
+    * Request Body : {
+    *   widget_id: <widget_id>,
+    *   new_value: <new_value>
+    * }
+    * Validate the request body
+    * Call the updateToggleState function in DataGatheringController
+*/
+router.put('/update/toggle', (req, res) => {
+
+});
+
 const validateFields = (fields) => {
     const { project_id, fingerprint, table } = fields;
 
