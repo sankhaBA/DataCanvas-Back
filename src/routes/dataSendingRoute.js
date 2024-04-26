@@ -111,6 +111,16 @@ router.get('/gauge/:widget_id', (req, res) => {
 router.get('/table/:widget_id', (req, res) => {
     const { widget_id } = req.params;
 
+    try {
+        if (widget_id == null) {
+            res.status(400).json({ error: 'Bad Request | CHECK widget_id | Request validation unsuccessful' });
+        } else {
+            DataSendingController.getParameterTableData(widget_id, res);
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 })
 
 /*
