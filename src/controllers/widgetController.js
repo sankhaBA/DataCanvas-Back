@@ -109,6 +109,10 @@ async function getWidgetsByProject(project_id, res) {
                     include: [{
                         model: Column,
                         attributes: ['clm_name'],
+                    },
+                    {
+                        model: Device,
+                        attributes: ['device_name'],
                     }]
                 });
 
@@ -175,6 +179,10 @@ async function getWidgetById(widget_id, res) {
                 include: [{
                     model: Column,
                     attributes: ['clm_name'],
+                },
+                {
+                    model: Device,
+                    attributes: ['device_name'],
                 }]
             });
         } else if (widget.widget_type == 3) {
