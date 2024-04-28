@@ -106,6 +106,10 @@ async function getWidgetsByProject(project_id, res) {
                     where: {
                         widget_id: widget.id,
                     },
+                    include: [{
+                        model: Column,
+                        attributes: ['clm_name'],
+                    }]
                 });
 
                 configuration = parameter_table_widget;
@@ -168,6 +172,10 @@ async function getWidgetById(widget_id, res) {
                 where: {
                     widget_id: widget_id,
                 },
+                include: [{
+                    model: Column,
+                    attributes: ['clm_name'],
+                }]
             });
         } else if (widget.widget_type == 3) {
             configuration = await ToggleWidget.findOne({
