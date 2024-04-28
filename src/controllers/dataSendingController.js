@@ -222,7 +222,7 @@ const getGaugeData = async (widget_id, res) => {
     * Function for loading data of parameter table widgets
 */
 const getParameterTableData = async (req, res) => {
-    const { widget_id, page, limit } = req.query;
+    const { widget_id, offset, limit } = req.query;
 
     try {
         // Check if the widget is available using WidgetModel. Include DataTable Model for dataset column 
@@ -274,6 +274,9 @@ const getParameterTableData = async (req, res) => {
             attributes.push(widgetConfiguration[i].Column.clm_name);
         }
 
+        // Sort attributes into alphabetical order
+        attributes.sort();
+
         // In the attributes array, if there is a element as 'id' move it to the start of the array
         const index_id = attributes.indexOf('id');
         if (index_id > -1) {
@@ -283,25 +286,44 @@ const getParameterTableData = async (req, res) => {
 
         // In the attributes array, if there is a element as 'device', if index_id is -1, move device to the begning of the array. If not, move it to the second place
         const index_device = attributes.indexOf('device');
-        attributes.splice(index_device, 1);
-        if (index_id == -1) {
-            attributes.unshift('device');
-        } else {
-            attributes.splice(1, 0, 'device');
+        if (index_device > -1) {
+            attributes.splice(index_device, 1);
+            if (index_id == -1) {
+                attributes.unshift('device');
+            } else {
+                attributes.splice(1, 0, 'device');
+            }
         }
 
-        let sql = `SELECT ${attributes.join(', ')} FROM "iot-on-earth-public"."datatable_${widget.dataset}"`;
-        if (widgetConfiguration[0].device_id != null) {
-            sql += ` WHERE device=${widgetConfiguration[0].device_id}`;
+        let transaction;
+        try {
+            transaction = await sequelize.transaction();
+
+            let sql = `SELECT ${attributes.join(', ')} FROM "iot-on-earth-public"."datatable_${widget.dataset}"`;
+            if (widgetConfiguration[0].device_id != null) {
+                sql += ` WHERE device=${widgetConfiguration[0].device_id}`;
+            }
+
+            // Add offset and limit to the above sql query
+            sql += ` ORDER BY id ASC LIMIT ${limit} OFFSET ${offset}`;
+
+            const data = await sequelize.query(sql, { transaction });
+
+            sql = `SELECT COUNT(*) FROM "iot-on-earth-public"."datatable_${widget.dataset}"`;
+            if (widgetConfiguration[0].device_id != null) {
+                sql += ` WHERE device=${widgetConfiguration[0].device_id}`;
+            }
+
+            const count = await sequelize.query(sql, { transaction });
+
+            await transaction.commit();
+
+            // Send all data with 200 request
+            res.status(200).json({ data: data[0], count: count[0] });
+        } catch (error) {
+            if (transaction) await transaction.rollback();
+            throw error;
         }
-
-        // Add offset and limit to the above sql query
-        sql += ` ORDER BY id ASC LIMIT ${limit} OFFSET ${page * limit}`;
-
-        const data = await sequelize.query(sql);
-
-        // Send all data with 200 request
-        res.status(200).json(data[0]);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal Server Error' });

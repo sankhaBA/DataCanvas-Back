@@ -109,10 +109,10 @@ router.get('/gauge/:widget_id', (req, res) => {
     * If not, call getParameterTableData function of DataSendingController by passing widget_id and res as parameters
 */
 router.get('/table/', (req, res) => {
-    const { widget_id, page, limit } = req.query;
+    const { widget_id, offset, limit } = req.query;
 
     try {
-        if (widget_id == null || page == null || limit == null) {
+        if (widget_id == null || offset == null || limit == null) {
             res.status(400).json({ error: 'Bad Request | CHECK widget_id | Request validation unsuccessful' });
         } else {
             DataSendingController.getParameterTableData(req, res);
