@@ -221,7 +221,9 @@ const getGaugeData = async (widget_id, res) => {
 /*
     * Function for loading data of parameter table widgets
 */
-const getParameterTableData = async (widget_id, res) => {
+const getParameterTableData = async (req, res) => {
+    const { widget_id, page, limit } = req.query;
+
     try {
         // Check if the widget is available using WidgetModel. Include DataTable Model for dataset column 
         const widget = await Widget.findByPk(widget_id, {
@@ -292,6 +294,9 @@ const getParameterTableData = async (widget_id, res) => {
         if (widgetConfiguration[0].device_id != null) {
             sql += ` WHERE device=${widgetConfiguration[0].device_id}`;
         }
+
+        // Add offset and limit to the above sql query
+        sql += ` ORDER BY id ASC LIMIT ${limit} OFFSET ${page * limit}`;
 
         const data = await sequelize.query(sql);
 
