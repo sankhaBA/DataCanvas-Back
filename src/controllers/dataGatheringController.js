@@ -4,6 +4,7 @@ const Devices = require("../models/deviceModel");
 const Column = require("../models/columnModel");
 const ColumnConstraint = require("../models/columnConstraintModel");
 const sequelize = require("./../../db");
+const { Transaction } = require("sequelize");
 
 async function insertData(req, res) {
     /*
@@ -472,8 +473,62 @@ async function deleteData(req, res) {
 */
 async function updateToggleState(req, res) {
 
-}
+    const { widget_id } = req.params;
+    const { new_value } = req.body;
 
+    try {
+        if (!widget_id) {
+            res.status(400).json({ error: 'Bad Request : widget_id is null' });
+            return;
+        }
+
+        if (new_value == null || new_value == undefined || typeof new_value != 'boolean') {
+            res.status(400).json({ error: 'Bad Request : new_value is null or not a valid boolean' });
+            return;
+        }
+
+        const widget = await ToggleWidget.findByPk(widget_id);
+        if (!widget) {
+            res.status(404).json({ message: "Widget not found" });
+            return;
+        }
+
+        const configuration = await ToggleWidget.findOne({
+            where: {
+                widget_id: widget_id
+            },
+            include: [{
+                model: Column,
+                attributes: ['clm_name']
+            },
+            {
+                model: Devices,
+                attributes: ['device_id']
+            }]
+        });
+
+        const transaction = new Transaction();
+
+        try {
+
+            await transaction.begin();
+            const sql = `SELECT * FROM "iot-on-earth-public"."datatable_${configuration.tbl_id}" WHERE device=${configuration.device_id} ORDER BY created_at DESC LIMIT 1`;
+            const record = await executeQuery(sql);
+            const updateSql = `UPDATE "iot-on-earth-public"."datatable_${configuration.tbl_id}" SET ${configuration.columns[0].clm_name}=${new_value} WHERE device=${configuration.device_id} AND created_at=${record[0].created_at}`;
+            await executeQuery(updateSql);
+            await transaction.commit();
+            res.status(200).json({ message: "Data updated successfully" });
+
+    }catch(error){
+        await transaction.rollback();
+        res.status(500).json({ message: 'Failed to update data' });
+
+}
+    } catch (error) {
+        console.error('Error updating data:', error);
+        res.status(500).json({ message: 'Failed to update data' });
+    }
+}
 // Check project_id is a valid and available project
 const validateProject = async (project_id) => {
     try {
@@ -595,7 +650,8 @@ const validateColumnMaxLength = (maxLength, data) => {
 module.exports = {
     insertData,
     deleteData,
-    updateData
+    updateData,
+    updateToggleState
 };
 
 
