@@ -98,6 +98,22 @@ router.get('/toggle/:widget_id', (req, res) => {
 
 })
 
+router.put('/toggle/:widget_id', (req, res) => {
+    const { widget_id } = req.params;
+    const { new_state } = req.body;
+
+    try{
+        if(widget_id){
+            DataSendingController.updateToggleData(widget_id,value,res);
+        } else{
+            res.status(400).json({ error: 'Bad Request : widget_id is null' });
+        }
+    } catch(error){
+        console.error('Error updating data:', error);
+        res.status(500).json({ message: 'Failed to update data' });
+    }
+})
+
 /*
     * Get request retrieve data of a selected gauge widget
     * API Endpoint : <root>/api/data/get/gauge/<widget_id>
