@@ -196,6 +196,28 @@ const searchWholeProject = async (keyword, user_id, res) => {
 */
 const getToggleData = async (widget_id, res) => {
 
+    try {
+        const widget = await Widget.findByPk(widget_id);
+
+        if(!widget){
+            res.status(404).json({message: "Widget not found"});
+            return;
+        }
+
+        const column = await Column.findById(widget.clm_id);
+        const clm_name = column.clm_name;
+
+        const tableName = 'datatable_' + widget.dataset;
+
+        let sql = `SELECT ${clm_name} FROM "iot-on-earth-public"."${tableName}" WHERE device = ${widget.device_id} ORDER BY id DESC LIMIT 1`;
+        
+        const data = await sequelize.query(sql);
+        
+
+    }catch(error){
+        console.error('Error retrieving data:', error);
+        res.status(500).json({ message: 'Failed to retrieve data' });
+    }   
 }
 
 /*
