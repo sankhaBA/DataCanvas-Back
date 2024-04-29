@@ -26,7 +26,7 @@ app.use("/api/data/tbl", verifyToken, dataTableHandlingRoute);
 app.use("/api/data/clm", verifyToken, columnRoute);
 app.use("/api/data/config", verifyToken, dataConfigRoute);
 app.use("/api/data/feed", dataGatheringRoute); // JWT middleware is not needed because data sent through this route is public
-app.use("/api/data/get", verifyToken, dataSendingRoute);
+app.use("/api/data/get", dataSendingRoute);
 app.use("/api/widget", verifyToken, widgetRoute);
 
 app.listen(PORT, () => {

@@ -63,8 +63,22 @@ router.delete('/delete', (req, res) => {
     * Call the updateToggleState function in DataGatheringController
 */
 router.put('/update/toggle', (req, res) => {
+    const { widget_id } = req.params;
+    const { new_value } = req.body;
 
+    try{
+        if(widget_id){
+            DataGatheringController.updateToggleData(widget_id,new_value,res);
+        } else{
+            res.status(400).json({ error: 'Bad Request : widget_id is null' });
+        }
+
+    } catch(error){
+        console.error('Error updating data:', error);
+        res.status(500).json({ message: 'Failed to update data' });
+    }
 });
+
 
 const validateFields = (fields) => {
     const { project_id, fingerprint, table } = fields;
