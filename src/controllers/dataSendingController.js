@@ -210,17 +210,17 @@ const getToggleData = async (widget_id, res) => {};
 
 const getGaugeData = async (widget_id, res) => {
   try {
-    const widget = await getWidgetByID(widget_id);
+    const widget = await Widget.findByPk(widget_id);
     if (!widget) {
       res.status(404).json({ message: "Widget not found" });
       return;
     }
-
-    const clm_name = await Column.findByPk(widget.configuration.clm_id);
-    if (!clm_name) {
+    const column = await Column.findByPk(widget.configuration.clm_id);
+    if (!column) {
       res.status(404).json({ message: "Column not found" });
       return;
     }
+    const clm_name = column.clm_name;
 
     const tableName = `datatable_${widget.dataset}`;
     const query = `SELECT ${clm_name} FROM ${tableName} WHERE device_id = ${widget.configuration.device_id} ORDER BY id DESC LIMIT 1`;
