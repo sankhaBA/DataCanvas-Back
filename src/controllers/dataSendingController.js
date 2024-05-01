@@ -190,44 +190,44 @@ const searchWholeProject = async (keyword, user_id, res) => { };
     * Wrap all these things with a try-catch block and if any error ocurrs, send 500 response
 */
 const getToggleData = async (widget_id, res) => {
+  try {
+    const widget = await Widget.findByPk(widget_id);
 
-    try {
-        const widget = await Widget.findByPk(widget_id);
+    if (!widget) {
+      res.status(404).json({ message: "Widget not found" });
+      return;
+    }
 
-        if(!widget){
-            res.status(404).json({message: "Widget not found"});
-            return;
-        }
+    const configuration = await ToggleWidget.findOne({
+      where: {
+        widget_id: widget_id
+      },
+      include: [{
+        model: Column,
+        attributes: ['clm_name']
+      }]
+    });
 
-        const configuration = await ToggleWidget.findOne({
-            where: {
-                widget_id: widget_id
-            },
-            include: [{
-                model: Column,
-                attributes: ['clm_name']
-            },
-            {
-                model: Device,
-                attributes: ['device_id']
-            }]
-        });
-        const tableName = 'datatable_' + widget.dataset;
+    if (!configuration) {
+      res.status(404).json({ message: "Configuration not found" });
+      return;
+    }
 
-        let sql = `SELECT ${configuration.Column.clm_name} FROM "iot-on-earth-public"."${tableName}" WHERE device = ${configuration.device_id} ORDER BY id DESC LIMIT 1`
-        
-        const data = await sequelize.query(sql);
-        
-        console.log(data[0][0][configuration.Column.clm_name])
-        if(data[0][0][configuration.Column.clm_name] == true || data[0][0][configuration.Column.clm_name] == false){
-            res.status(200).json(data[0]);
-        } else {
-            res.status(500).json({message: "Data is not boolean"});
-        }
-    }catch(error){
-        console.error('Error retrieving data:', error);
-        res.status(500).json({ message: 'Failed to retrieve data' });
-    }   
+    const tableName = 'datatable_' + widget.dataset;
+
+    let sql = `SELECT ${configuration.Column.clm_name} FROM "iot-on-earth-public"."${tableName}" WHERE device = ${configuration.device_id} ORDER BY id DESC LIMIT 1`
+
+    const data = await sequelize.query(sql);
+
+    if (data[0][0][configuration.Column.clm_name] == true || data[0][0][configuration.Column.clm_name] == false) {
+      res.status(200).json(data[0]);
+    } else {
+      res.status(500).json({ message: "Data is not boolean" });
+    }
+  } catch (error) {
+    console.error('Error retrieving data:', error);
+    res.status(500).json({ message: 'Failed to retrieve data' });
+  }
 }
 
 /*

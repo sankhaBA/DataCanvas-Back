@@ -3,6 +3,8 @@ const Project = require("../models/projectModel");
 const Devices = require("../models/deviceModel");
 const Column = require("../models/columnModel");
 const ColumnConstraint = require("../models/columnConstraintModel");
+const Widget = require("../models/widgetModel");
+const ToggleWidget = require("../models/toggleWidgetModel");
 const sequelize = require("./../../db");
 const { Transaction } = require("sequelize");
 
@@ -472,22 +474,20 @@ async function deleteData(req, res) {
     * If any other error occurs, send a 500 response with the appropriate message
 */
 async function updateToggleState(req, res) {
-
-    const { widget_id } = req.params;
-    const { new_value } = req.body;
+    const { widget_id, new_value } = req.body;
 
     try {
-        if (!widget_id) {
-            res.status(400).json({ error: 'Bad Request : widget_id is null' });
+        if (widget_id == null || new_value == null || new_value == undefined) {
+            res.status(400).json({ error: 'Bad Request : new_value is null' });
             return;
         }
 
-        if (new_value == null || new_value == undefined || typeof new_value != 'boolean') {
-            res.status(400).json({ error: 'Bad Request : new_value is null or not a valid boolean' });
+        if (new_value != true && new_value != false) {
+            res.status(400).json({ error: 'Bad Request : new_value should be true or false' });
             return;
         }
 
-        const widget = await ToggleWidget.findByPk(widget_id);
+        const widget = await Widget.findByPk(widget_id);
         if (!widget) {
             res.status(404).json({ message: "Widget not found" });
             return;
@@ -500,30 +500,27 @@ async function updateToggleState(req, res) {
             include: [{
                 model: Column,
                 attributes: ['clm_name']
-            },
-            {
-                model: Devices,
-                attributes: ['device_id']
             }]
         });
 
-        const transaction = new Transaction();
+        if (!configuration) {
+            res.status(404).json({ message: "Configuration not found" });
+            return;
+        }
 
         try {
+            await sequelize.transaction(async (t) => {
+                const sql = `SELECT * FROM "iot-on-earth-public"."datatable_${widget.dataset}" WHERE device=${configuration.device_id} ORDER BY created_at DESC LIMIT 1`;
+                const record = await sequelize.query(sql, { transaction: t });
+                const updateSql = `UPDATE "iot-on-earth-public"."datatable_${widget.dataset}" SET ${configuration.Column.clm_name}=${new_value} WHERE device=${configuration.device_id} AND id=${record[0][0].id}`;
+                await sequelize.query(updateSql, { transaction: t });
+            });
 
-            await transaction.begin();
-            const sql = `SELECT * FROM "iot-on-earth-public"."datatable_${configuration.tbl_id}" WHERE device=${configuration.device_id} ORDER BY created_at DESC LIMIT 1`;
-            const record = await executeQuery(sql);
-            const updateSql = `UPDATE "iot-on-earth-public"."datatable_${configuration.tbl_id}" SET ${configuration.columns[0].clm_name}=${new_value} WHERE device=${configuration.device_id} AND created_at=${record[0].created_at}`;
-            await executeQuery(updateSql);
-            await transaction.commit();
             res.status(200).json({ message: "Data updated successfully" });
-
-    }catch(error){
-        await transaction.rollback();
-        res.status(500).json({ message: 'Failed to update data' });
-
-}
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: "Internal Server Error" });
+        }
     } catch (error) {
         console.error('Error updating data:', error);
         res.status(500).json({ message: 'Failed to update data' });
