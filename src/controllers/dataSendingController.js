@@ -171,7 +171,7 @@ const getLatestTimestampOfProject = async (project_id, res) => {
  * If any error occurs, send a 500 response
  * If there are no results, send the object in above structure with a 200 response
  */
-const searchWholeProject = async (keyword, user_id, res) => {};
+const searchWholeProject = async (keyword, user_id, res) => { };
 
 /*
  * Get data for a toggle widget
@@ -189,7 +189,7 @@ const searchWholeProject = async (keyword, user_id, res) => {};
  * If not, send data with a 500 response
  * Wrap all these things with a try-catch block and if any error ocurrs, send 500 response
  */
-const getToggleData = async (widget_id, res) => {};
+const getToggleData = async (widget_id, res) => { };
 
 /*
  * Get data for a gauge  widget
@@ -215,44 +215,54 @@ const getGaugeData = async (widget_id, res) => {
       res.status(404).json({ message: "Widget not found" });
       return;
     }
-    const column = await Column.findByPk(widget.configuration.clm_id);
-    if (!column) {
-      res.status(404).json({ message: "Column not found" });
-      return;
-    }
-    const clm_name = column.clm_name;
 
-    const tableName = `datatable_${widget.dataset}`;
-    const query = `SELECT ${clm_name} FROM ${tableName} WHERE device_id = ${widget.configuration.device_id} ORDER BY id DESC LIMIT 1`;
-    const result = await sequelize.query(query, {
-      type: sequelize.QueryTypes.SELECT,
+    const configuration = await GaugeWidget.findOne({
+      where: {
+        widget_id: widget_id,
+      },
+      include: [
+        {
+          model: Column,
+          attributes: ["clm_name"],
+        },
+      ],
     });
 
-    if (result.length > 0) {
-      const value = parseFloat(result[0][clm_name]);
-      if (isNaN(value)) {
-        res.status(500).json({ message: "Data is not a number" });
+    if (!configuration) {
+      res.status(404).json({ message: "Configuration not found" });
+      return;
+    }
+
+    const tableName = `"iot-on-earth-public".datatable_${widget.dataset}`;
+    const query = `SELECT ${configuration.Column.clm_name} FROM ${tableName} WHERE device = ${configuration.device_id} ORDER BY id DESC LIMIT 1`;
+    const result = await sequelize.query(query);
+
+    if (result[0][0][configuration.Column.clm_name]) {
+      if (isNaN(result[0][0][configuration.Column.clm_name])) {
+        res.status(500).json({ message: "Value is not a number" });
+        return;
       } else {
-        res.status(200).json({ data: value });
+        res.status(200).json(result[0][0])
       }
     } else {
-      res.status(404).json({ message: "No data found" });
+      res.status(500).json({ message: "Value is not available" });
+      return;
     }
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
 /*
  * Function for loading data of parameter table widgets
  */
-const getParameterTableData = async (widget_id, res) => {};
+const getParameterTableData = async (widget_id, res) => { };
 
 /*
  * Function for loading data of chart widgets
  */
-const getChartData = async (widget_id, res) => {};
+const getChartData = async (widget_id, res) => { };
 
 module.exports = {
   getAllDataOfATable,
