@@ -9,6 +9,8 @@ const ParameterTableWidget = require("../models/parameterTableWidgetModel");
 const ToggleWidget = require("../models/toggleWidgetModel");
 const GaugeWidget = require("../models/gaugeWidgetModel");
 const sequelize = require("../../db");
+const { Model, where, Op } = require("sequelize");
+const DataTable = require("../models/dataTableModel");
 
 const getAllDataOfATable = async (req, res) => {
     const { tbl_id, offset, limit } = req.query;
@@ -175,7 +177,62 @@ const getLatestTimestampOfProject = async (project_id, res) => {
     * If there are no results, send the object in above structure with a 200 response
 */
 const searchWholeProject = async (keyword, user_id, res) => {
+    try{
+        //search for project
+        const projects = await Project.findAll({
+        where: {
+            where: { user_id },
+            attributes: ['project_id', 'project_name']}
+        });
 
+        const projectResult = projects.filter(project.project_name.includes(keyword));
+
+        //search in devices
+        const device = await Device.findAll({
+            include :[{
+                Model: Project,
+                where: {user_id}
+            }],
+            attributes: ['device_id','device_name'],
+            where: {
+                device_name: { [Op.like]: `%${keyword}%` }
+                }
+            });
+
+        //search in data tables
+        const datatables = await DataTable.findAll({
+            include: [{
+                Model: Project,
+                where : {user_id}
+            }],
+            attributes: ['tbl_id','tbl_name'],
+            where: {
+                tbl_name: {[Op.like]: `%${keyword}%`}
+            }
+        });
+        //Search in Widgets
+        const widgets = await Widget.findAll({
+            include: [{
+                model: Project,
+                where: { user_id }
+            }],
+            attributes: ['widget_id', 'widget_name'],
+            where: {
+                widget_name: { [Op.like]: `%${keyword}%` }
+            }
+        });
+
+        const searchResults = {
+            projects: projectResult,
+            devices: devices,
+            datatables: datatables,
+            widgets: widgets
+        };
+        res.status(200).json(searchResults);
+    } catch(error){
+        console.error('error searching', error);
+        res.status(500).json({message: 'failed to search'});
+    }    
 }
 
 /*
@@ -241,5 +298,6 @@ module.exports = {
     getToggleData,
     getGaugeData,
     getParameterTableData,
-    getChartData
+    getChartData,
+    searchWholeProject 
 };
