@@ -84,8 +84,6 @@ router.get('/search/', (req, res) => {
 */
 router.get('/toggle/:widget_id', (req, res) => {
     const { widget_id } = req.params;
-
-
 })
 
 /*
@@ -97,8 +95,16 @@ router.get('/toggle/:widget_id', (req, res) => {
 */
 router.get('/gauge/:widget_id', (req, res) => {
     const { widget_id } = req.params;
-
-
+    try {
+        if (widget_id) {
+            DataSendingController.getGaugeData(widget_id, res);
+        } else {
+            res.status(400).json({ error: 'Bad Request | CHECK widget_id | Request validation unsuccessful' });
+        }
+    } catch (error) {
+        console.error('Error retrieving data:', error);
+        res.status(500).json({ message: 'Failed to retrieve data' });
+    }
 })
 
 /*
