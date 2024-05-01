@@ -122,6 +122,14 @@ async function getWidgetsByProject(project_id, res) {
                     where: {
                         widget_id: widget.id,
                     },
+                    include: [{
+                        model: Column,
+                        attributes: ['clm_name'],
+                    },
+                    {
+                        model: Device,
+                        attributes: ['device_name'],
+                    }]
                 });
 
                 configuration = toggle_widget;
@@ -130,6 +138,14 @@ async function getWidgetsByProject(project_id, res) {
                     where: {
                         widget_id: widget.id,
                     },
+                    include: [{
+                        model: Column,
+                        attributes: ['clm_name'],
+                    },
+                    {
+                        model: Device,
+                        attributes: ['device_name'],
+                    }]
                 });
 
                 configuration = gauge_widget;
@@ -190,12 +206,28 @@ async function getWidgetById(widget_id, res) {
                 where: {
                     widget_id: widget_id,
                 },
+                include: [{
+                    model: Column,
+                    attributes: ['clm_name'],
+                },
+                {
+                    model: Device,
+                    attributes: ['device_name'],
+                }]
             });
         } else if (widget.widget_type == 4) {
             configuration = await GaugeWidget.findOne({
                 where: {
                     widget_id: widget_id,
                 },
+                include: [{
+                    model: Column,
+                    attributes: ['clm_name'],
+                },
+                {
+                    model: Device,
+                    attributes: ['device_name'],
+                }]
             });
         }
 

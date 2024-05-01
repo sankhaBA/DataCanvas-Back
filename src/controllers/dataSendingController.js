@@ -214,13 +214,13 @@ const getToggleData = async (widget_id, res) => {
     }
 
     const tableName = 'datatable_' + widget.dataset;
-    
+
     let sql = `SELECT ${configuration.Column.clm_name} FROM "iot-on-earth-public"."${tableName}" WHERE device = ${configuration.device_id} ORDER BY id DESC LIMIT 1`
 
     const data = await sequelize.query(sql);
 
     if (data[0][0][configuration.Column.clm_name] == true || data[0][0][configuration.Column.clm_name] == false) {
-      res.status(200).json(data[0]);
+      res.status(200).json(data[0][0]);
     } else {
       res.status(500).json({ message: "Data is not boolean" });
     }
@@ -234,112 +234,112 @@ const getToggleData = async (widget_id, res) => {
     * Function for loading data of parameter table widgets
 */
 const getParameterTableData = async (req, res) => {
-    const { widget_id, offset, limit } = req.query;
+  const { widget_id, offset, limit } = req.query;
 
-    try {
-        // Check if the widget is available using WidgetModel. Include DataTable Model for dataset column 
-        const widget = await Widget.findByPk(widget_id, {
-            include: {
-                model: Table,
-                attributes: ['tbl_name']
-            }
-        });
+  try {
+    // Check if the widget is available using WidgetModel. Include DataTable Model for dataset column 
+    const widget = await Widget.findByPk(widget_id, {
+      include: {
+        model: Table,
+        attributes: ['tbl_name']
+      }
+    });
 
-        // Get the widget configuration using ParameterTableWidgetModel. Use the widget ID. Include Column Model for clm_id column
-        const widgetConfiguration = await ParameterTableWidget.findAll({
-            where: {
-                widget_id: widget_id
-            },
-            include: {
-                model: Column,
-                attributes: ['clm_name']
-            }
-        });
+    // Get the widget configuration using ParameterTableWidgetModel. Use the widget ID. Include Column Model for clm_id column
+    const widgetConfiguration = await ParameterTableWidget.findAll({
+      where: {
+        widget_id: widget_id
+      },
+      include: {
+        model: Column,
+        attributes: ['clm_name']
+      }
+    });
 
-        // If the widget configuration is not available, send a 404 Not Found error and return
-        if (!widgetConfiguration) {
-            return res.status(404).json({ message: 'Widget configuration not found' });
-        }
-
-        /*
-            * Get all records from "iot-on-earth-public"."datatable_<widget.dataset>" table
-            * Only include the columns that are in the widget configuration
-            * Widget Configuration Structure : 
-            * [
-            *   {
-            *       "id": Number,
-            *       "widget_id": Number
-            *       "clm_id": Number
-            *       "device_id": Number
-            *       "Column" : {
-            *           "clm_name": String
-            *       }
-            *   }
-            * ]
-            * Use the above clm_names in the array as attributes which are needed to be retrieved
-            * If above device_id (device_id is same in every array element. So, the device_id of the array's first element is ok) is null, do not include a where statement
-            * If device_id is not null, add a where clause to the sql query to filter data with device=<device_id>
-        */
-
-        let attributes = [];
-        for (let i = 0; i < widgetConfiguration.length; i++) {
-            attributes.push(widgetConfiguration[i].Column.clm_name);
-        }
-
-        // Sort attributes into alphabetical order
-        attributes.sort();
-
-        // In the attributes array, if there is a element as 'id' move it to the start of the array
-        const index_id = attributes.indexOf('id');
-        if (index_id > -1) {
-            attributes.splice(index_id, 1);
-            attributes.unshift('id');
-        }
-
-        // In the attributes array, if there is a element as 'device', if index_id is -1, move device to the begning of the array. If not, move it to the second place
-        const index_device = attributes.indexOf('device');
-        if (index_device > -1) {
-            attributes.splice(index_device, 1);
-            if (index_id == -1) {
-                attributes.unshift('device');
-            } else {
-                attributes.splice(1, 0, 'device');
-            }
-        }
-
-        let transaction;
-        try {
-            transaction = await sequelize.transaction();
-
-            let sql = `SELECT ${attributes.join(', ')} FROM "iot-on-earth-public"."datatable_${widget.dataset}"`;
-            if (widgetConfiguration[0].device_id != null) {
-                sql += ` WHERE device=${widgetConfiguration[0].device_id}`;
-            }
-
-            // Add offset and limit to the above sql query
-            sql += ` ORDER BY id ASC LIMIT ${limit} OFFSET ${offset}`;
-
-            const data = await sequelize.query(sql, { transaction });
-
-            sql = `SELECT COUNT(*) FROM "iot-on-earth-public"."datatable_${widget.dataset}"`;
-            if (widgetConfiguration[0].device_id != null) {
-                sql += ` WHERE device=${widgetConfiguration[0].device_id}`;
-            }
-
-            const count = await sequelize.query(sql, { transaction });
-
-            await transaction.commit();
-
-            // Send all data with 200 request
-            res.status(200).json({ data: data[0], count: count[0] });
-        } catch (error) {
-            if (transaction) await transaction.rollback();
-            throw error;
-        }
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal Server Error' });
+    // If the widget configuration is not available, send a 404 Not Found error and return
+    if (!widgetConfiguration) {
+      return res.status(404).json({ message: 'Widget configuration not found' });
     }
+
+    /*
+        * Get all records from "iot-on-earth-public"."datatable_<widget.dataset>" table
+        * Only include the columns that are in the widget configuration
+        * Widget Configuration Structure : 
+        * [
+        *   {
+        *       "id": Number,
+        *       "widget_id": Number
+        *       "clm_id": Number
+        *       "device_id": Number
+        *       "Column" : {
+        *           "clm_name": String
+        *       }
+        *   }
+        * ]
+        * Use the above clm_names in the array as attributes which are needed to be retrieved
+        * If above device_id (device_id is same in every array element. So, the device_id of the array's first element is ok) is null, do not include a where statement
+        * If device_id is not null, add a where clause to the sql query to filter data with device=<device_id>
+    */
+
+    let attributes = [];
+    for (let i = 0; i < widgetConfiguration.length; i++) {
+      attributes.push(widgetConfiguration[i].Column.clm_name);
+    }
+
+    // Sort attributes into alphabetical order
+    attributes.sort();
+
+    // In the attributes array, if there is a element as 'id' move it to the start of the array
+    const index_id = attributes.indexOf('id');
+    if (index_id > -1) {
+      attributes.splice(index_id, 1);
+      attributes.unshift('id');
+    }
+
+    // In the attributes array, if there is a element as 'device', if index_id is -1, move device to the begning of the array. If not, move it to the second place
+    const index_device = attributes.indexOf('device');
+    if (index_device > -1) {
+      attributes.splice(index_device, 1);
+      if (index_id == -1) {
+        attributes.unshift('device');
+      } else {
+        attributes.splice(1, 0, 'device');
+      }
+    }
+
+    let transaction;
+    try {
+      transaction = await sequelize.transaction();
+
+      let sql = `SELECT ${attributes.join(', ')} FROM "iot-on-earth-public"."datatable_${widget.dataset}"`;
+      if (widgetConfiguration[0].device_id != null) {
+        sql += ` WHERE device=${widgetConfiguration[0].device_id}`;
+      }
+
+      // Add offset and limit to the above sql query
+      sql += ` ORDER BY id ASC LIMIT ${limit} OFFSET ${offset}`;
+
+      const data = await sequelize.query(sql, { transaction });
+
+      sql = `SELECT COUNT(*) FROM "iot-on-earth-public"."datatable_${widget.dataset}"`;
+      if (widgetConfiguration[0].device_id != null) {
+        sql += ` WHERE device=${widgetConfiguration[0].device_id}`;
+      }
+
+      const count = await sequelize.query(sql, { transaction });
+
+      await transaction.commit();
+
+      // Send all data with 200 request
+      res.status(200).json({ data: data[0], count: count[0] });
+    } catch (error) {
+      if (transaction) await transaction.rollback();
+      throw error;
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
 }
 
 /*
@@ -396,7 +396,7 @@ const getGaugeData = async (widget_id, res) => {
         res.status(200).json(result[0][0])
       }
     } else {
-      res.status(500).json({ message: "Value is not available" });
+      res.status(404).json({ message: "Value is not available" });
       return;
     }
   } catch (error) {
@@ -404,11 +404,6 @@ const getGaugeData = async (widget_id, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
-/*
- * Function for loading data of parameter table widgets
- */
-const getParameterTableData = async (widget_id, res) => { };
 
 /*
  * Function for loading data of chart widgets
