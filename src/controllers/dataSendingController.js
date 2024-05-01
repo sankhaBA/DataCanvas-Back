@@ -174,22 +174,61 @@ const getLatestTimestampOfProject = async (project_id, res) => {
 const searchWholeProject = async (keyword, user_id, res) => { };
 
 /*
- * Get data for a toggle widget
- * Load Widget Details Including its Configuration  (Refer getWidgetByID function in widgetController)
- * If the widget is not available, send a 404 Not Found error and return
- * Retrieve clm_name using Column model of the clm_id in widget configuration
- * Get the latest record from the relevant table by generating the correct SQL query.
- * SQL query details are as follows
- * Table name : datatable_<dataset> from widget
- * column : clm_name retrieved earlier
- * where : filter by device_id in widget configuration
- * Get only the latest record by sorting records by id
- * Validate the value whether it is true or false.
- * If it is true or false, send data with a 200 response
- * If not, send data with a 500 response
- * Wrap all these things with a try-catch block and if any error ocurrs, send 500 response
- */
-const getToggleData = async (widget_id, res) => { };
+    * Get data for a toggle widget
+    * Load Widget Details Including its Configuration  (Refer getWidgetByID function in widgetController)
+    * If the widget is not available, send a 404 Not Found error and return
+    * Retrieve clm_name using Column model of the clm_id in widget configuration
+    * Get the latest record from the relevant table by generating the correct SQL query.
+    * SQL query details are as follows
+    * Table name : datatable_<dataset> from widget
+    * column : clm_name retrieved earlier
+    * where : filter by device_id in widget configuration
+    * Get only the latest record by sorting records by id
+    * Validate the value whether it is true or false. 
+    * If it is true or false, send data with a 200 response
+    * If not, send data with a 500 response
+    * Wrap all these things with a try-catch block and if any error ocurrs, send 500 response
+*/
+const getToggleData = async (widget_id, res) => {
+  try {
+    const widget = await Widget.findByPk(widget_id);
+
+    if (!widget) {
+      res.status(404).json({ message: "Widget not found" });
+      return;
+    }
+
+    const configuration = await ToggleWidget.findOne({
+      where: {
+        widget_id: widget_id
+      },
+      include: [{
+        model: Column,
+        attributes: ['clm_name']
+      }]
+    });
+
+    if (!configuration) {
+      res.status(404).json({ message: "Configuration not found" });
+      return;
+    }
+
+    const tableName = 'datatable_' + widget.dataset;
+
+    let sql = `SELECT ${configuration.Column.clm_name} FROM "iot-on-earth-public"."${tableName}" WHERE device = ${configuration.device_id} ORDER BY id DESC LIMIT 1`
+
+    const data = await sequelize.query(sql);
+
+    if (data[0][0][configuration.Column.clm_name] == true || data[0][0][configuration.Column.clm_name] == false) {
+      res.status(200).json(data[0]);
+    } else {
+      res.status(500).json({ message: "Data is not boolean" });
+    }
+  } catch (error) {
+    console.error('Error retrieving data:', error);
+    res.status(500).json({ message: 'Failed to retrieve data' });
+  }
+}
 
 /*
  * Get data for a gauge  widget

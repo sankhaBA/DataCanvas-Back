@@ -84,7 +84,19 @@ router.get('/search/', (req, res) => {
 */
 router.get('/toggle/:widget_id', (req, res) => {
     const { widget_id } = req.params;
+
+    try{
+        if(widget_id){
+            DataSendingController.getToggleData(widget_id,res);
+        } else{
+            res.status(400).json({ error: 'Bad Request | CHECK widget_id | Request validation unsuccessful' });
+        }
+    } catch(error){
+        console.error('Error retrieving data:', error);
+        res.status(500).json({ message: 'Failed to retrieve data' });
+    }
 })
+
 
 /*
     * Get request retrieve data of a selected gauge widget
