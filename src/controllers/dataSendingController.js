@@ -171,7 +171,76 @@ const getLatestTimestampOfProject = async (project_id, res) => {
  * If any error occurs, send a 500 response
  * If there are no results, send the object in above structure with a 200 response
  */
-const searchWholeProject = async (keyword, user_id, res) => { };
+const searchWholeProject = async (keyword, user_id, res) => {
+  try {
+    // Load all projects of the specific user
+    const projects = await Project.findAll({
+      attributes: ["project_id", "project_name"],
+      where: {
+        user_id: user_id,
+      },
+    });
+
+    // Search in Projects
+    const projectResults = await Project.findAll({
+      attributes: ["project_id", "project_name"],
+      where: {
+        project_name: {
+          [Op.iLike]: "%" + keyword + "%",
+        },
+      },
+    });
+
+    // Search in Devices
+    const deviceResults = await Device.findAll({
+      attributes: ["device_id", "device_name"],
+      where: {
+        device_name: {
+          [Op.iLike]: "%" + keyword + "%",
+        },
+        project_id: {
+          [Op.in]: projects.map((project) => project.project_id),
+        },
+      },
+    });
+
+    // Search in DataTables
+    const datatableResults = await Table.findAll({
+      attributes: ["tbl_id", "tbl_name"],
+      where: {
+        tbl_name: {
+          [Op.iLike]: "%" + keyword + "%",
+        },
+        project_id: {
+          [Op.in]: projects.map((project) => project.project_id),
+        },
+      },
+    });
+
+    // Search in Widgets
+    const widgetResults = await Widget.findAll({
+      attributes: ["id", "widget_name"],
+      where: {
+        widget_name: {
+          [Op.iLike]: "%" + keyword + "%",
+        },
+        project_id: {
+          [Op.in]: projects.map((project) => project.project_id),
+        },
+      },
+    });
+
+    res.status(200).json({
+      projects: projectResults,
+      devices: deviceResults,
+      datatables: datatableResults,
+      widgets: widgetResults,
+    });
+  } catch (error) {
+    console.error("Error searching:", error);
+    res.status(500).json({ message: "Failed to search" });
+  }
+};
 
 /*
     * Get data for a toggle widget
