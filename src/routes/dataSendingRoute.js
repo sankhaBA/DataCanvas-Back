@@ -70,25 +70,16 @@ router.get('/latest/project/', (req, res) => {
     * keyword and user_id is sent as a query parameter
     * Call searchWholeProject function of DataSendingController by passing the keyword, user_id and res as parameters
 */
-router.get('/search/', async(req, res) => {
-    
-    const { user_id, keyword } = req.query;
+router.get('/search', async (req, res) => {
+    const { keyword, user_id } = req.query;
     try {
-        if (project_id) {
-            //controller method to perform the search based on project_id
-            const searchResults = await DataSendingController.searchByProjectId(project_id);
-
-            res.status(200).json(searchResults);
-        } else {
-             //when project_id is not provided
-            res.status(400).json({ error: 'Bad Request | CHECK project_id | Request validation unsuccessful' });
-        }
+        await DataSendingController.searchWholeProject(keyword, user_id, res);
     } catch (error) {
-       
         console.error('Error searching data:', error);
         res.status(500).json({ message: 'Failed to search data' });
     }
-})
+});
+
 
 /*
     * Get request retrieve data of a selected toggle widget
