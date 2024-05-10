@@ -72,6 +72,16 @@ router.get('/latest/project/', (req, res) => {
 */
 router.get('/search/', (req, res) => {
     const { keyword, user_id } = req.query;
+    try {
+        if (keyword == null || user_id == null) {
+            res.status(400).json({ error: 'Bad Request | CHECK keyword and user_id | Request validation unsuccessful' });
+        } else {
+            DataSendingController.searchWholeProject(keyword, user_id, res);
+        }
+    } catch (error) {
+        console.error('Error searching data:', error);
+        res.status(500).json({ message: 'Failed to search data' });
+    }
 
 })
 
@@ -85,13 +95,13 @@ router.get('/search/', (req, res) => {
 router.get('/toggle/:widget_id', (req, res) => {
     const { widget_id } = req.params;
 
-    try{
-        if(widget_id){
-            DataSendingController.getToggleData(widget_id,res);
-        } else{
+    try {
+        if (widget_id) {
+            DataSendingController.getToggleData(widget_id, res);
+        } else {
             res.status(400).json({ error: 'Bad Request | CHECK widget_id | Request validation unsuccessful' });
         }
-    } catch(error){
+    } catch (error) {
         console.error('Error retrieving data:', error);
         res.status(500).json({ message: 'Failed to retrieve data' });
     }
