@@ -47,21 +47,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
-CREATE OR REPLACE FUNCTION "iot-on-earth-public".delete_datatable() RETURNS TRIGGER AS $$
-DECLARE
-    tbl_name TEXT;
-BEGIN
-    -- Construct the table name dynamically
-    tbl_name := 'datatable_' || OLD.tbl_id;
-
-    -- Drop the dynamically constructed table
-    EXECUTE 'DROP TABLE IF EXISTS "iot-on-earth-public".' || tbl_name;
-
-    RETURN OLD;
-END;
-$$ LANGUAGE plpgsql;
-
 -- TRIGGERS
 
 CREATE OR REPLACE TRIGGER after_delete_toggle AFTER
@@ -88,7 +73,3 @@ CREATE OR REPLACE TRIGGER after_delete_parametertable_column AFTER
 DELETE ON "iot-on-earth-public".parametertables
 FOR EACH ROW EXECUTE FUNCTION "iot-on-earth-public".check_and_delete_widget();
 
-
-CREATE OR REPLACE TRIGGER after_delete_datatable AFTER
-DELETE ON "iot-on-earth-public".datatables
-FOR EACH ROW EXECUTE FUNCTION "iot-on-earth-public".delete_datatable();
