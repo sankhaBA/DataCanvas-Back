@@ -71,12 +71,12 @@ router.get('/latest/project/', (req, res) => {
     * Call searchWholeProject function of DataSendingController by passing the keyword, user_id and res as parameters
 */
 router.get('/search/', (req, res) => {
-    const { keyword, user_id } = req.query;
+    const { keyword, project_id } = req.query;
     try {
-        if (keyword == null || user_id == null) {
-            res.status(400).json({ error: 'Bad Request | CHECK keyword and user_id | Request validation unsuccessful' });
+        if (keyword == null || project_id == null) {
+            res.status(400).json({ error: 'Bad Request | CHECK keyword and project_id | Request validation unsuccessful' });
         } else {
-            DataSendingController.searchWholeProject(keyword, user_id, res);
+            DataSendingController.searchWholeProject(keyword, project_id, res);
         }
     } catch (error) {
         console.error('Error searching data:', error);

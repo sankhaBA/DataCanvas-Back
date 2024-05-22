@@ -9,6 +9,7 @@ const ParameterTableWidget = require("../models/parameterTableWidgetModel");
 const ToggleWidget = require("../models/toggleWidgetModel");
 const GaugeWidget = require("../models/gaugeWidgetModel");
 const sequelize = require("../../db");
+const { Op } = require("sequelize");
 
 const getAllDataOfATable = async (req, res) => {
   const { tbl_id, offset, limit } = req.query;
@@ -171,26 +172,8 @@ const getLatestTimestampOfProject = async (project_id, res) => {
  * If any error occurs, send a 500 response
  * If there are no results, send the object in above structure with a 200 response
  */
-const searchWholeProject = async (keyword, user_id, res) => {
+const searchWholeProject = async (keyword, project_id, res) => {
   try {
-    // Load all projects of the specific user
-    const projects = await Project.findAll({
-      attributes: ["project_id", "project_name"],
-      where: {
-        user_id: user_id,
-      },
-    });
-
-    // Search in Projects
-    const projectResults = await Project.findAll({
-      attributes: ["project_id", "project_name"],
-      where: {
-        project_name: {
-          [Op.iLike]: "%" + keyword + "%",
-        },
-      },
-    });
-
     // Search in Devices
     const deviceResults = await Device.findAll({
       attributes: ["device_id", "device_name"],
@@ -198,9 +181,7 @@ const searchWholeProject = async (keyword, user_id, res) => {
         device_name: {
           [Op.iLike]: "%" + keyword + "%",
         },
-        project_id: {
-          [Op.in]: projects.map((project) => project.project_id),
-        },
+        project_id: project_id,
       },
     });
 
@@ -211,9 +192,7 @@ const searchWholeProject = async (keyword, user_id, res) => {
         tbl_name: {
           [Op.iLike]: "%" + keyword + "%",
         },
-        project_id: {
-          [Op.in]: projects.map((project) => project.project_id),
-        },
+        project_id: project_id,
       },
     });
 
@@ -224,14 +203,11 @@ const searchWholeProject = async (keyword, user_id, res) => {
         widget_name: {
           [Op.iLike]: "%" + keyword + "%",
         },
-        project_id: {
-          [Op.in]: projects.map((project) => project.project_id),
-        },
+        project_id: project_id,
       },
     });
 
     res.status(200).json({
-      projects: projectResults,
       devices: deviceResults,
       datatables: datatableResults,
       widgets: widgetResults,
@@ -488,4 +464,5 @@ module.exports = {
   getGaugeData,
   getParameterTableData,
   getChartData,
+  searchWholeProject
 };
