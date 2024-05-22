@@ -76,10 +76,10 @@ DECLARE
     tbl_name TEXT;
 BEGIN
     -- Construct the table name dynamically
-    tbl_name := 'iot-on-earth-public.datatable_' || OLD.tbl_id;
+    tbl_name := 'datatable_' || OLD.tbl_id;
 
     -- Drop the dynamically constructed table
-    EXECUTE 'DROP TABLE IF EXISTS ' || tbl_name;
+    EXECUTE 'DROP TABLE IF EXISTS "iot-on-earth-public".' || tbl_name;
 
     RETURN OLD;
 END;
