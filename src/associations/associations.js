@@ -26,6 +26,22 @@ Widget.belongsTo(Project, {
     foreignKey: 'project_id',
 });
 
+Widget.hasMany(ChartWidget, {
+    foreignKey: 'widget_id',
+});
+
+Widget.hasMany(ParameterTableWidget, {
+    foreignKey: 'widget_id',
+});
+
+Widget.hasMany(ToggleWidget, {
+    foreignKey: 'widget_id',
+});
+
+Widget.hasMany(GaugeWidget, {
+    foreignKey: 'widget_id',
+});
+
 ChartWidget.belongsTo(Widget, {
     foreignKey: 'widget_id',
 });
@@ -85,3 +101,4 @@ GaugeWidget.belongsTo(Column, {
 GaugeWidget.belongsTo(Device, {
     foreignKey: 'device_id',
 });
+
