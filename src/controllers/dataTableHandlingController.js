@@ -181,7 +181,14 @@ async function deleteTable(tbl_id, res) {
   try {
     const deletedTable = await Table.destroy({ where: { tbl_id } });
     if (deletedTable > 0) {
-      res.status(200).json({ message: "Table deleted successfully" });
+      let sql = `DROP TABLE "iot-on-earth-public"."datatable_${tbl_id}"`;
+      try {
+        let result = await sequelize.query(sql);
+        res.status(200).json({ message: "Table deleted successfully" });
+      } catch (error) {
+        console.error("Error deleting table:", error);
+        res.status(202).json({ error: "Table deleted partially" });
+      }
     } else {
       res.status(404).json({ message: "Table not found" });
     }
@@ -193,9 +200,20 @@ async function deleteTable(tbl_id, res) {
 
 // Delete all tables of a project at once
 async function deleteAllTable(project_id, res) {
+  const tables = await Table.findAll({ where: { project_id } });
+
   const deletedTable = await Table.destroy({ where: { project_id } });
   try {
     if (deletedTable > 0) {
+      for (let i = 0; i < tables.length; i++) {
+        let sql = `DROP TABLE "iot-on-earth-public"."datatable_${tables[i].tbl_id}"`;
+        try {
+          let result = await sequelize.query(sql);
+        } catch (error) {
+          console.error("Error deleting tables:", error);
+          continue;
+        }
+      }
       res.status(200).json({ message: "Table deleted successfully" });
     } else {
       res.status(404).json({ message: "Table not found" });

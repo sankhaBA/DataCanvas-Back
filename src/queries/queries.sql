@@ -1,24 +1,11 @@
+-- FUNCTIONS
+
 CREATE OR REPLACE FUNCTION "iot-on-earth-public".delete_from_widget() RETURNS TRIGGER AS $$
 BEGIN
   DELETE FROM "iot-on-earth-public".widgets WHERE id = OLD.widget_id;
   RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE TRIGGER after_delete_toggle AFTER
-DELETE ON "iot-on-earth-public".toggles
-FOR EACH ROW EXECUTE FUNCTION "iot-on-earth-public".delete_from_widget();
-
-
-CREATE OR REPLACE TRIGGER after_delete_gauge AFTER
-DELETE ON "iot-on-earth-public".gauges
-FOR EACH ROW EXECUTE FUNCTION "iot-on-earth-public".delete_from_widget();
-
-
-CREATE OR REPLACE TRIGGER after_delete_chart AFTER
-DELETE ON "iot-on-earth-public".charts
-FOR EACH ROW EXECUTE FUNCTION "iot-on-earth-public".delete_from_widget();
 
 
 CREATE OR REPLACE FUNCTION "iot-on-earth-public".check_and_delete_chart() RETURNS TRIGGER AS $$
@@ -41,11 +28,6 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE TRIGGER after_delete_chartseries AFTER
-DELETE ON "iot-on-earth-public".chartseries
-FOR EACH ROW EXECUTE FUNCTION "iot-on-earth-public".check_and_delete_chart();
-
-
 CREATE OR REPLACE FUNCTION "iot-on-earth-public".check_and_delete_widget() RETURNS TRIGGER AS $$
 DECLARE
     column_count INT;
@@ -66,11 +48,6 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE TRIGGER after_delete_parametertable_column AFTER
-DELETE ON "iot-on-earth-public".parametertables
-FOR EACH ROW EXECUTE FUNCTION "iot-on-earth-public".check_and_delete_widget();
-
-
 CREATE OR REPLACE FUNCTION "iot-on-earth-public".delete_datatable() RETURNS TRIGGER AS $$
 DECLARE
     tbl_name TEXT;
@@ -84,6 +61,32 @@ BEGIN
     RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;
+
+-- TRIGGERS
+
+CREATE OR REPLACE TRIGGER after_delete_toggle AFTER
+DELETE ON "iot-on-earth-public".toggles
+FOR EACH ROW EXECUTE FUNCTION "iot-on-earth-public".delete_from_widget();
+
+
+CREATE OR REPLACE TRIGGER after_delete_gauge AFTER
+DELETE ON "iot-on-earth-public".gauges
+FOR EACH ROW EXECUTE FUNCTION "iot-on-earth-public".delete_from_widget();
+
+
+CREATE OR REPLACE TRIGGER after_delete_chart AFTER
+DELETE ON "iot-on-earth-public".charts
+FOR EACH ROW EXECUTE FUNCTION "iot-on-earth-public".delete_from_widget();
+
+
+CREATE OR REPLACE TRIGGER after_delete_chartseries AFTER
+DELETE ON "iot-on-earth-public".chartseries
+FOR EACH ROW EXECUTE FUNCTION "iot-on-earth-public".check_and_delete_chart();
+
+
+CREATE OR REPLACE TRIGGER after_delete_parametertable_column AFTER
+DELETE ON "iot-on-earth-public".parametertables
+FOR EACH ROW EXECUTE FUNCTION "iot-on-earth-public".check_and_delete_widget();
 
 
 CREATE OR REPLACE TRIGGER after_delete_datatable AFTER
