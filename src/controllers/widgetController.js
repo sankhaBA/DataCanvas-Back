@@ -421,14 +421,16 @@ async function updateWidgetById(req, res) {
                     returning: true,
                     transaction: t
                 });
-                // Delete existing series
-                await ChartSeries.destroy({
+
+                // Get existing series
+                let oldSeries = await ChartSeries.findAll({
                     where: {
                         chart_id: updatedChart.id
                     },
                     transaction: t
                 });
 
+                // Create new series
                 for (let i = 0; i < configuration.series.length; i++) {
                     const series = configuration.series[i];
                     await ChartSeries.create({
@@ -438,9 +440,14 @@ async function updateWidgetById(req, res) {
                         device_id: series.device_id,
                     }, { transaction: t });
                 }
+
+                // Delete existing series
+                for (let oldSeriesItem of oldSeries) {
+                    await oldSeriesItem.destroy({ transaction: t });
+                }
             } else if (widget_type == 2) {
-                // Delete existing columns
-                await ParameterTableWidget.destroy({
+                // Get existing columns
+                let oldColumns = await ParameterTableWidget.findAll({
                     where: {
                         widget_id: widget_id
                     },
@@ -454,6 +461,11 @@ async function updateWidgetById(req, res) {
                         clm_id: configuration.columns[i],
                         device_id: configuration.device_id,
                     }, { transaction: t });
+                }
+
+                // Delete existing columns
+                for (let oldColumn of oldColumns) {
+                    await oldColumn.destroy({ transaction: t });
                 }
 
             } else if (widget_type == 3) {

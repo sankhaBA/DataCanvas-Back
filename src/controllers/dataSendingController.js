@@ -453,7 +453,61 @@ const getGaugeData = async (widget_id, res) => {
 /*
  * Function for loading data of chart widgets
  */
-const getChartData = async (widget_id, res) => { };
+const getChartData = async (widget_id, res) => {
+  try {
+    const widget = await Widget.findByPk(widget_id);
+
+    if (!widget) {
+      res.status(404).json({ message: "Widget not found" });
+      return;
+    }
+
+    const configuration = await ChartWidget.findOne({
+      where: {
+        widget_id: widget_id,
+      },
+      include: [
+        {
+          model: ChartSeries,
+          attributes: ["clm_id"],
+          include: [
+            {
+              model: Column,
+              attributes: ["clm_name"],
+            },
+          ],
+        },
+        {
+          model: Column,
+          attributes: ["clm_name"],
+        }
+      ],
+    });
+
+    if (!configuration) {
+      res.status(404).json({ message: "Configuration not found" });
+      return;
+    }
+
+    const tableName = "datatable_" + widget.dataset;
+
+    let attributes = [];
+    for (let i = 0; i < configuration.ChartSeries.length; i++) {
+      attributes.push(configuration.ChartSeries[i].Column.clm_name);
+    }
+
+    attributes.sort();
+
+    let sql = `SELECT ${attributes.join(", ")} FROM "iot-on-earth-public"."${tableName}" WHERE device = ${configuration.device_id} ORDER BY id ASC`;
+
+    const data = await sequelize.query(sql);
+
+    res.status(200).json(data[0]);
+  } catch (error) {
+    console.error("Error retrieving data:", error);
+    res.status(500).json({ message: "Failed to retrieve data" });
+  }
+};
 
 module.exports = {
   getAllDataOfATable,
