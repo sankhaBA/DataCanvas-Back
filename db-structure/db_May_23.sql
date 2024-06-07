@@ -15,12 +15,13 @@ CREATE TABLE IF NOT EXISTS "iot-on-earth-public".users (user_id integer NOT NULL
                                                                                                                                                                                                                                                               updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
                                                                                                                                                                                                                                                                                                              CONSTRAINT users_pkey PRIMARY KEY (user_id))
 CREATE TABLE IF NOT EXISTS "iot-on-earth-public".projects
-    (project_id integer NOT NULL DEFAULT nextval('"iot-on-earth-public".projects_project_id_seq'::regclass),
-                                         project_name character varying(50) COLLATE pg_catalog."default" NOT NULL,
-                                                                                                         description character varying(200) COLLATE pg_catalog."default",
-                                                                                                                                                    user_id integer, created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-                                                                                                                                                                                                                    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-                                                                                                                                                                                                                                                                   CONSTRAINT projects_pkey PRIMARY KEY (project_id), CONSTRAINT projects_user_id_fkey
+    ( project_id integer NOT NULL DEFAULT nextval('"iot-on-earth-public".projects_project_id_seq'::regclass),
+                                          project_name character varying(50) COLLATE pg_catalog."default" NOT NULL,
+                                                                                                          description character varying(200) COLLATE pg_catalog."default",
+                                                                                                                                                     user_id integer, created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+                                                                                                                                                                                                                     updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+                                                                                                                                                                                                                                                                    real_time_enabled boolean DEFAULT false,
+                                                                                                                                                                                                                                                                                                      CONSTRAINT projects_pkey PRIMARY KEY (project_id), CONSTRAINT projects_user_id_fkey
      FOREIGN KEY (user_id) REFERENCES "iot-on-earth-public".users (user_id) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE)
 CREATE TABLE IF NOT EXISTS "iot-on-earth-public".devices
     (device_name character varying(50) COLLATE pg_catalog."default" NOT NULL,
@@ -91,10 +92,10 @@ CREATE TABLE IF NOT EXISTS "iot-on-earth-public".chartseries
                                                                                                                      CONSTRAINT chartseries_device_id_fkey
      FOREIGN KEY (device_id) REFERENCES "iot-on-earth-public".devices (device_id) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE NOT VALID)
 CREATE TABLE IF NOT EXISTS "iot-on-earth-public".parametertables
-    ( id integer NOT NULL DEFAULT nextval('"iot-on-earth-public".parametertables_id_seq'::regclass),
-                                  widget_id integer NOT NULL,
-                                                    clm_id integer NOT NULL,
-                                                                   device_id integer, CONSTRAINT parametertables_pkey PRIMARY KEY (id), CONSTRAINT parametertables_clm_id_fkey
+    (id integer NOT NULL DEFAULT nextval('"iot-on-earth-public".parametertables_id_seq'::regclass),
+                                 widget_id integer NOT NULL,
+                                                   clm_id integer NOT NULL,
+                                                                  device_id integer, CONSTRAINT parametertables_pkey PRIMARY KEY (id), CONSTRAINT parametertables_clm_id_fkey
      FOREIGN KEY (clm_id) REFERENCES "iot-on-earth-public".columns (clm_id) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE,
                                                                                                                      CONSTRAINT parametertables_device_id_fkey
      FOREIGN KEY (device_id) REFERENCES "iot-on-earth-public".devices (device_id) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE NOT VALID,

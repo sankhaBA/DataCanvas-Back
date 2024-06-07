@@ -44,7 +44,7 @@ async function getProjectById(project_id, res) {
 
 
 async function addProject(req, res) {
-    const { project_name, user_id, description } = req.body;
+    const { project_name, user_id, description, real_time_enabled } = req.body;
 
     // Check user_id available using User Model
     try {
@@ -61,7 +61,7 @@ async function addProject(req, res) {
     }
 
     try {
-        let project = await Project.create({ project_name, user_id, description });
+        let project = await Project.create({ project_name, user_id, description, real_time_enabled });
         res.status(200).json(project);
     } catch (error) {
         console.error('Error adding project:', error);
@@ -70,10 +70,10 @@ async function addProject(req, res) {
 }
 
 async function updateProjectById(req, res) {
-    const { project_id, project_name, description } = req.body;
+    const { project_id, project_name, description, real_time_enabled } = req.body;
 
     try {
-        let updatedRowCount = await Project.update({ project_name, description }, { where: { project_id } });
+        let updatedRowCount = await Project.update({ project_name, description, real_time_enabled }, { where: { project_id } });
 
         if (updatedRowCount > 0) {
             res.status(200).json({ message: "Project updated successfully" });
