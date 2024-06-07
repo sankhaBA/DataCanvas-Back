@@ -453,7 +453,78 @@ const getGaugeData = async (widget_id, res) => {
 /*
  * Function for loading data of chart widgets
  */
-const getChartData = async (widget_id, res) => { };
+const getChartData = async (widget_id, res) => {
+  try {
+    const widget = await Widget.findByPk(widget_id);
+
+    if (!widget) {
+      res.status(404).json({ message: "Widget not found" });
+      return;
+    }
+
+    const configuration = await ChartWidget.findOne({
+      where: {
+        widget_id: widget_id,
+      },
+      include: [
+        {
+          model: ChartSeries,
+          attributes: ["clm_id", "device_id", "series_name"],
+          include: [
+            {
+              model: Column,
+              attributes: ["clm_name"],
+            },
+          ],
+        },
+        {
+          model: Column,
+          attributes: ["clm_name"],
+        }
+      ],
+    });
+
+    if (!configuration) {
+      res.status(404).json({ message: "Configuration not found" });
+      return;
+    }
+
+    const tableName = `"iot-on-earth-public".datatable_${widget.dataset}`;
+
+    let chartData = [];
+    for (let series of configuration.ChartSeries) {
+      chartData.push({
+        name: series.series_name,
+        clm_name: series.Column.clm_name,
+        device_id: series.device_id,
+        data: []
+      });
+    }
+
+    let x_axis = '';
+    if (configuration.Column == null) {
+      x_axis = 'created_at';
+    } else {
+      x_axis = configuration.Column.clm_name;
+    }
+
+    for (let data of chartData) {
+      let sql = `SELECT id, ${x_axis},${data.clm_name} FROM ${tableName} WHERE device = ${data.device_id} ORDER BY id DESC`;
+      const result = await sequelize.query(sql);
+      data.data = result[0].map((record) => {
+        return {
+          x: (x_axis == 'created_at') ? new Date(record[x_axis]) : record[x_axis],
+          y: record[data.clm_name]
+        }
+      });
+    }
+
+    res.status(200).json(chartData);
+  } catch (error) {
+    console.error("Error retrieving data:", error);
+    res.status(500).json({ message: "Failed to retrieve data" });
+  }
+};
 
 module.exports = {
   getAllDataOfATable,

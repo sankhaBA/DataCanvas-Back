@@ -161,6 +161,16 @@ router.get('/table/', (req, res) => {
 router.get('/chart/:widget_id', (req, res) => {
     const { widget_id } = req.params;
 
+    try {
+        if (widget_id) {
+            DataSendingController.getChartData(widget_id, res);
+        } else {
+            res.status(400).json({ error: 'Bad Request | CHECK widget_id | Request validation unsuccessful' });
+        }
+    } catch (error) {
+        console.error('Error retrieving data:', error);
+        res.status(500).json({ message: 'Failed to retrieve data' });
+    }
 })
 
 module.exports = router;
