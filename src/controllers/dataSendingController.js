@@ -469,7 +469,7 @@ const getChartData = async (widget_id, res) => {
       include: [
         {
           model: ChartSeries,
-          attributes: ["clm_id"],
+          attributes: ["clm_id", "device_id", "series_name"],
           include: [
             {
               model: Column,
@@ -489,20 +489,37 @@ const getChartData = async (widget_id, res) => {
       return;
     }
 
-    const tableName = "datatable_" + widget.dataset;
+    const tableName = `"iot-on-earth-public".datatable_${widget.dataset}`;
 
-    let attributes = [];
-    for (let i = 0; i < configuration.ChartSeries.length; i++) {
-      attributes.push(configuration.ChartSeries[i].Column.clm_name);
+    let chartData = [];
+    for (let series of configuration.ChartSeries) {
+      chartData.push({
+        name: series.series_name,
+        clm_name: series.Column.clm_name,
+        device_id: series.device_id,
+        data: []
+      });
     }
 
-    attributes.sort();
+    let x_axis = '';
+    if (configuration.Column == null) {
+      x_axis = 'created_at';
+    } else {
+      x_axis = configuration.Column.clm_name;
+    }
 
-    let sql = `SELECT ${attributes.join(", ")} FROM "iot-on-earth-public"."${tableName}" WHERE device = ${configuration.device_id} ORDER BY id ASC`;
+    for (let data of chartData) {
+      let sql = `SELECT id, ${x_axis},${data.clm_name} FROM ${tableName} WHERE device = ${data.device_id} ORDER BY id DESC`;
+      const result = await sequelize.query(sql);
+      data.data = result[0].map((record) => {
+        return {
+          x: (x_axis == 'created_at') ? new Date(record[x_axis]) : record[x_axis],
+          y: record[data.clm_name]
+        }
+      });
+    }
 
-    const data = await sequelize.query(sql);
-
-    res.status(200).json(data[0]);
+    res.status(200).json(chartData);
   } catch (error) {
     console.error("Error retrieving data:", error);
     res.status(500).json({ message: "Failed to retrieve data" });
