@@ -15,6 +15,7 @@ const columnRoute = require("./routes/columnRoute");
 const dataGatheringRoute = require("./routes/dataGatheringRoute");
 const dataSendingRoute = require("./routes/dataSendingRoute");
 const widgetRoute = require("./routes/widgetRoute");
+const analyticWidgetRoute = require("./routes/analyticWidgetRoute");
 
 const PORT = process.env.PORT || 3001;
 
@@ -28,6 +29,7 @@ app.use("/api/data/config", verifyToken, dataConfigRoute);
 app.use("/api/data/feed", dataGatheringRoute); // JWT middleware is not needed because data sent through this route is public
 app.use("/api/data/get", verifyToken, dataSendingRoute);
 app.use("/api/widget", verifyToken, widgetRoute);
+app.use("/api/analytic_widget", analyticWidgetRoute);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

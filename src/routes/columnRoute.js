@@ -18,6 +18,23 @@ router.get('/', (req, res) => {
     }
 });
 
+router.get('/project/:project_id', (req, res) => {
+    const project_id = req.params.project_id;
+
+    try {
+        if (project_id) {  // if project_id parameter is available, perform the desired operation
+            // Call the appropriate controller method here
+            // For example: columnController.getColumnsByProjectId(project_id, res);
+            columnController.getColumnsByProjectId(project_id, res);
+        } else {  // If project_id parameter is not available, send an error response
+            res.status(400).json({ message: 'Bad Request' });
+        }
+    } catch (error) {
+        console.error('Error getting columns by project:', error);
+        res.status(500).json({ message: 'Failed to get columns by project' });
+    }
+});
+
 router.get('/:clm_id', (req, res) => {
     const clm_id = req.params.clm_id;
 
