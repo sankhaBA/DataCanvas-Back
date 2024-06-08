@@ -52,6 +52,7 @@ async function createAnalyticWidget(project, widget_name, widget_type, dataset, 
             project,
             parameter,
             device,
+            latest_value_timestamp: new Date(),
         });
 
         res.status(200).json(widget);
