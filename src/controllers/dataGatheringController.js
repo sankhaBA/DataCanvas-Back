@@ -96,47 +96,56 @@ async function insertData(req, res) {
         */
         let foundColumn = false
         for (let column in data) {
-            foundColumn = columns.find((clm) => { if (clm.clm_name == column) { return clm } else { return false } });
+            console.log(column)
+            if (column != 'created_at') {
+                foundColumn = columns.find((clm) => { if (clm.clm_name == column) { return clm } else { return false } });
 
-            if (!foundColumn) {
-                res.status(400).json({ error: `Column ${column} not found | CHECK column name` });
-                return;
-            }
-
-            // Check data type of the value
-            if (!validateColumnDataType(foundColumn.data_type, data[column])) {
-                res.status(400).json({ error: `Data type of ${column} does not match | CHECK data type` });
-                return;
-            }
-
-            // Check max length of the value
-            if (foundColumn.max_length != null && foundColumn.dataType == 2 && !validateColumnMaxLength(foundColumn.max_length, data[column])) {
-                res.status(400).json({ error: `Max length of ${column} exceeded | CHECK data length` });
-                return;
-            }
-
-            // Check if the column has auto increment and there is a value for the column
-            // Check if the column has constraint of NOT NULL
-            let foundColumnConstraints = JSON.stringify(foundColumn.constraints)
-            foundColumnConstraints = JSON.parse(foundColumnConstraints)
-            let autoIncrement = foundColumnConstraints.some((constraint) => {
-                return constraint.constraint_id === 1;
-            });
-            let notNull = foundColumnConstraints.some((constraint) => {
-                return constraint.constraint_id === 2;
-            });
-
-            if (autoIncrement) {
-                if (data[column]) {
-                    res.status(400).json({ error: `Column ${column} has auto increment | CHECK Column value should not be sent` });
+                if (!foundColumn) {
+                    res.status(400).json({ error: `Column ${column} not found | CHECK column name` });
                     return;
+                }
+
+                // Check data type of the value
+                if (!validateColumnDataType(foundColumn.data_type, data[column])) {
+                    res.status(400).json({ error: `Data type of ${column} does not match | CHECK data type` });
+                    return;
+                }
+
+                // Check max length of the value
+                if (foundColumn.max_length != null && foundColumn.dataType == 2 && !validateColumnMaxLength(foundColumn.max_length, data[column])) {
+                    res.status(400).json({ error: `Max length of ${column} exceeded | CHECK data length` });
+                    return;
+                }
+
+                // Check if the column has auto increment and there is a value for the column
+                // Check if the column has constraint of NOT NULL
+                let foundColumnConstraints = JSON.stringify(foundColumn.constraints)
+                foundColumnConstraints = JSON.parse(foundColumnConstraints)
+                let autoIncrement = foundColumnConstraints.some((constraint) => {
+                    return constraint.constraint_id === 1;
+                });
+                let notNull = foundColumnConstraints.some((constraint) => {
+                    return constraint.constraint_id === 2;
+                });
+
+                if (autoIncrement) {
+                    if (data[column]) {
+                        res.status(400).json({ error: `Column ${column} has auto increment | CHECK Column value should not be sent` });
+                        return;
+                    }
+                } else {
+                    if (notNull && !data[column] == null || data[column] == undefined) {
+                        res.status(400).json({ error: `Column ${column} cannot be NULL | CHECK column value` });
+                        return;
+                    }
                 }
             } else {
-                if (notNull && !data[column] == null || data[column] == undefined) {
-                    res.status(400).json({ error: `Column ${column} cannot be NULL | CHECK column value` });
+                if (!validateColumnDataType(5, data[column])) {
+                    res.status(400).json({ error: `Data type of ${column} does not match | CHECK data type` });
                     return;
                 }
             }
+
         }
 
         // Get all the columns from columns list that have constraint_id = 2
@@ -609,6 +618,8 @@ const validateColumnDataType = (dataType, data) => {
     * 1 - INTEGER
     * 2 - DOUBLE
     * 3 - STRING
+    * 4 - BOOLEAN
+    * 5 - TIMESTAMP in format 'YYYY-MM-DD HH:MM:SS'
     */
     if (data == null || data == undefined) {
         return true;
@@ -631,7 +642,17 @@ const validateColumnDataType = (dataType, data) => {
         if (typeof data != 'string') {
             return false;
         }
+    } else if (dataType == 4) {
+        if (data != true && data != false) {
+            return false;
+        }
+    } else if (dataType == 5) {
+        const timestampRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
+        if (!timestampRegex.test(data)) {
+            return false;
+        }
     }
+
 
     return true;
 }
