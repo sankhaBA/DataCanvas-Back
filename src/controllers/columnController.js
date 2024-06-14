@@ -1,5 +1,6 @@
 const ColumnConstraint = require('../models/columnConstraintModel');
 const Column = require('../models/columnModel');
+const Project = require('../models/projectModel');
 const Table = require('../models/dataTableModel');
 const Constraint = require('../models/constraintModel');
 const sequelize = require("./../../db");
@@ -184,6 +185,43 @@ async function getColumnById(clm_id, res) {
   }
 }
 
+async function getColumnsByProjectId(project_id, res) {
+  try {
+    const project = await Project.findByPk(project_id);
+    if (!project) {
+      res.status(404).json({ message: 'Project not found' });
+      return;
+    }
+  } catch (error) {
+    console.error('Error getting project by ID:', error);
+    res.status(500).json({ error: 'Failed to get project' });
+  }
+
+  try {
+    const tables = await Table.findAll({
+      where: { project_id },
+      attributes: {
+        exclude: ['createdAt', 'updatedAt'] // Exclude timestamp columns
+      },
+      include: [
+        {
+          model: Column,
+          as: 'columns',
+          attributes: {
+            exclude: ['createdAt', 'updatedAt'] // Exclude timestamp columns
+          },
+        }
+      ]
+    });
+
+    res.status(200).json(tables);
+  } catch (error) {
+    console.error('Error getting all columns:', error);
+    res.status(500).json({ error: 'Failed to get columns of project' });
+  }
+
+}
+
 //update the column by its ID
 async function updateColumnById(req, res) {
   const { clm_id, clm_name, data_type, default_value, max_length, tbl_id } = req.body;
@@ -305,6 +343,7 @@ async function deleteColumnById(clm_id, res) {
 module.exports = {
   getAllColumns,
   getColumnById,
+  getColumnsByProjectId,
   addColumn,
   updateColumnById,
   deleteColumnById

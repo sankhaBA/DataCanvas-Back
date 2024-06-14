@@ -1,5 +1,7 @@
 const Project = require('../models/projectModel');
 const User = require('../models/userModel');
+const DataTable = require('../models/dataTableModel');
+const sequelize = require("./../../db");
 require('dotenv').config();
 
 async function getProjectsByUserId(user_id, res) {
@@ -42,7 +44,7 @@ async function getProjectById(project_id, res) {
 
 
 async function addProject(req, res) {
-    const { project_name, user_id, description } = req.body;
+    const { project_name, user_id, description, real_time_enabled } = req.body;
 
     // Check user_id available using User Model
     try {
@@ -59,7 +61,7 @@ async function addProject(req, res) {
     }
 
     try {
-        let project = await Project.create({ project_name, user_id, description });
+        let project = await Project.create({ project_name, user_id, description, real_time_enabled });
         res.status(200).json(project);
     } catch (error) {
         console.error('Error adding project:', error);
@@ -68,10 +70,10 @@ async function addProject(req, res) {
 }
 
 async function updateProjectById(req, res) {
-    const { project_id, project_name, description } = req.body;
+    const { project_id, project_name, description, real_time_enabled } = req.body;
 
     try {
-        let updatedRowCount = await Project.update({ project_name, description }, { where: { project_id } });
+        let updatedRowCount = await Project.update({ project_name, description, real_time_enabled }, { where: { project_id } });
 
         if (updatedRowCount > 0) {
             res.status(200).json({ message: "Project updated successfully" });
@@ -86,14 +88,31 @@ async function updateProjectById(req, res) {
 }
 
 async function deleteProjectById(project_id, res) {
-    const deletedRowCount = await Project.destroy({ where: { project_id } });
     try {
-        if (deletedRowCount > 0) {
-            res.status(200).json({ message: "Project deleted successfully" });
-        }
-        else {
-            res.status(404).json({ message: "Project not found" });
-        }
+        await sequelize.transaction(async (t) => {
+            // Get all tbl_id from DataTable where project_id = project_id
+            const dataTables = await DataTable.findAll({ where: { project_id }, transaction: t });
+
+            const deletedRowCount = await Project.destroy({ where: { project_id }, transaction: t });
+
+            // Seek (use for each loop) the DataTables and call sql query to drop a table with the name `iot-on-earth-public"."datatable_${tbl_id}
+            for (let tbl of dataTables) {
+                let sql = `DROP TABLE "iot-on-earth-public"."datatable_${tbl.tbl_id}"`;
+                try {
+                    await sequelize.query(sql, { transaction: t });
+                } catch (error) {
+                    console.error('Error dropping table:', error);
+                    throw new Error('Failed to drop table');
+                }
+            }
+
+            if (deletedRowCount > 0) {
+                res.status(200).json({ message: "Project deleted successfully" });
+            }
+            else {
+                res.status(404).json({ message: "Project not found" });
+            }
+        });
     } catch (error) {
         console.error('Error deleting project:', error);
         res.status(500).json({ error: 'Failed to delete project' });

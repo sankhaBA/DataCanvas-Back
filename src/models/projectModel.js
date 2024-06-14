@@ -2,7 +2,7 @@ const { DataTypes, Model } = require('sequelize');
 const sequelize = require('../../db'); // Import the Sequelize instance
 const User = require('./userModel');
 
-class Project extends Model {}
+class Project extends Model { }
 
 Project.init(
   {
@@ -25,6 +25,10 @@ Project.init(
         model: User,
         key: 'user_id',
       },
+    },
+    real_time_enabled: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
   },
   {
