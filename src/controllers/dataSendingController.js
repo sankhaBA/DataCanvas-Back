@@ -453,7 +453,7 @@ const getGaugeData = async (widget_id, res) => {
 /*
  * Function for loading data of chart widgets
  */
-const getChartData = async (widget_id, res) => {
+const getChartData = async (widget_id, recordLimit, res) => {
   try {
     const widget = await Widget.findByPk(widget_id);
 
@@ -510,6 +510,9 @@ const getChartData = async (widget_id, res) => {
 
     for (let data of chartData) {
       let sql = `SELECT id, ${x_axis},${data.clm_name} FROM ${tableName} WHERE device = ${data.device_id} ORDER BY id DESC`;
+      if (recordLimit) {
+        sql += ` LIMIT ${recordLimit}`;
+      }
       const result = await sequelize.query(sql);
       data.data = result[0].map((record) => {
         return {

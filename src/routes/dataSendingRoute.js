@@ -160,10 +160,14 @@ router.get('/table/', (req, res) => {
 */
 router.get('/chart/:widget_id', (req, res) => {
     const { widget_id } = req.params;
+    const { recordLimit } = req.query;
 
     try {
         if (widget_id) {
-            DataSendingController.getChartData(widget_id, res);
+            if (recordLimit == null || recordLimit == undefined || recordLimit == '') {
+                recordLimit = 1000;
+            }
+            DataSendingController.getChartData(widget_id, recordLimit, res);
         } else {
             res.status(400).json({ error: 'Bad Request | CHECK widget_id | Request validation unsuccessful' });
         }
