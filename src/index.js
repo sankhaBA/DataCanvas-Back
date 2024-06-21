@@ -17,6 +17,9 @@ const dataSendingRoute = require("./routes/dataSendingRoute");
 const widgetRoute = require("./routes/widgetRoute");
 const analyticWidgetRoute = require("./routes/analyticWidgetRoute");
 
+// Initialize MQTT client
+const mqttClient = require('./utils/mqttClient');
+
 const PORT = process.env.PORT || 3001;
 
 app.use("/api/user", userRoute);
