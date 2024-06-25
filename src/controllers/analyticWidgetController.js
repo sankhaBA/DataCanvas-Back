@@ -70,14 +70,6 @@ async function updateAnalyticWidget(widget_id, widget_name, widget_type, dataset
             return;
         }
 
-        // await widget.update({
-        //     widget_name,
-        //     widget_type,
-        //     dataset,
-        //     parameter,
-        //     device,
-        // });
-
         await AnalyticWidget.update({
             widget_name,
             widget_type,
