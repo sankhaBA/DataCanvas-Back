@@ -62,7 +62,7 @@ async function createAnalyticWidget(project, widget_name, widget_type, dataset, 
     }
 }
 
-async function updateAnalyticWidget(widget_id, widget_name, widget_type, dataset, parameter, device, res) {
+async function updateAnalyticWidget(widget_id, widget_name, widget_type, dataset, project, parameter, device, res) {
     try {
         const widget = await AnalyticWidget.findByPk(widget_id);
         if (!widget) {
@@ -70,12 +70,24 @@ async function updateAnalyticWidget(widget_id, widget_name, widget_type, dataset
             return;
         }
 
-        await widget.update({
+        // await widget.update({
+        //     widget_name,
+        //     widget_type,
+        //     dataset,
+        //     parameter,
+        //     device,
+        // });
+
+        await AnalyticWidget.update({
             widget_name,
             widget_type,
             dataset,
             parameter,
             device,
+        }, {
+            where: {
+                id: widget_id,
+            },
         });
 
         res.status(200).json(widget);
