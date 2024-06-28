@@ -50,11 +50,9 @@ client.on('message', async (topic, message) => {
       if (result && result.message == 'Data inserted successfully') {
         publish(`projectSuccess/${projectID}/data/`,
           // Publish request data
-          JSON.stringify({
-            deviceID: result.device_id,
-            table: result.tbl_id,
-            data: result.data
-          })
+          JSON.stringify(
+            result.data
+          )
         );
       }
     } else {
