@@ -61,7 +61,13 @@ async function addProject(req, res) {
     }
 
     try {
-        let project = await Project.create({ project_name, user_id, description, real_time_enabled });
+        let mqtt_key = generateFingerprint();
+        if (!mqtt_key) {
+            res.status(500).json({ error: 'Failed to create project' });
+            return;
+        }
+
+        let project = await Project.create({ project_name, user_id, description, real_time_enabled, mqtt_key });
         res.status(200).json(project);
     } catch (error) {
         console.error('Error adding project:', error);
@@ -117,6 +123,30 @@ async function deleteProjectById(project_id, res) {
         console.error('Error deleting project:', error);
         res.status(500).json({ error: 'Failed to delete project' });
     }
+}
+
+// Genrate fingerprint
+async function generateFingerprint() {
+    let fingerprint = "";
+    let projectWithSameFingerprint = false;
+
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    do {
+        for (let i = 0; i < 32; i++) {
+            fingerprint += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+
+        try {
+            projectWithSameFingerprint = await Project.findOne({ where: { mqtt_key } });
+        } catch (error) {
+            console.error('Error checking fingerprint:', error);
+            return false;
+        }
+
+    } while (projectWithSameFingerprint);
+
+    return fingerprint;
 }
 
 module.exports = {

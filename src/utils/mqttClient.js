@@ -23,8 +23,9 @@ client.on('message', async (topic, message) => {
 
   const requestData = {
     project_id: projectID,
+    mqtt_key: data.mqttKey,
     fingerprint: data.deviceID,
-    table: data.table, 
+    table: data.table,
     data: data.data
   };
 
@@ -42,7 +43,7 @@ client.on('message', async (topic, message) => {
 
 // check if all required fields are present
 function validateFields(data) {
-  const { project_id, fingerprint, table, data: payload } = data;
+  const { project_id, mqtt_key, fingerprint, table, data: payload } = data;
   return project_id && fingerprint && table && payload;
 }
 

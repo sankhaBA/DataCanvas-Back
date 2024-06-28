@@ -30,6 +30,9 @@ Project.init(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+    mqtt_key: {
+      type: DataTypes.STRING,
+    },
   },
   {
     sequelize, // Pass the initialized Sequelize instance

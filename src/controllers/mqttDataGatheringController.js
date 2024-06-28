@@ -6,13 +6,14 @@ const ColumnConstraint = require("../models/columnConstraintModel");
 const sequelize = require("./../../db");
 
 async function insertData(requestData) {
-    const { project_id, fingerprint, table, data } = requestData;
+    const { project_id, mqtt_key, fingerprint, table, data } = requestData;
 
     try {
+        const project = await validateProject(project_id, mqtt_key);
         const device_id = await validateDevice(fingerprint);
         const tbl_id = await validateTable(project_id, table);
 
-        if (!await validateProject(project_id)) {
+        if (!project) {
             throw new Error("Project not found | CHECK project_id");
         }
 
@@ -91,10 +92,21 @@ async function insertData(requestData) {
 }
 
 // Validation functions
-async function validateProject(project_id) {
+async function validateProject(project_id, mqtt_key) {
     try {
         let project = await Project.findOne({ where: { project_id } });
-        return !!project;
+
+        if (!project || project.length == 0 || project == null || project == undefined) {
+            console.log('Project not found')
+            return false;
+        } else {
+            if (project.mqtt_key != mqtt_key) {
+                console.log('Invalid Key')
+                return false;
+            }
+        }
+
+        return project;
     } catch (error) {
         console.error('Error checking project_id:', error);
         return false;
@@ -104,6 +116,11 @@ async function validateProject(project_id) {
 async function validateDevice(fingerprint) {
     try {
         let device = await Devices.findOne({ where: { fingerprint } });
+        if (device == null || device == undefined || device.length == 0) {
+            console.log('Device not found')
+            return false;
+        }
+
         return device ? device.device_id : false;
     } catch (error) {
         console.error('Error checking device:', error);
@@ -114,6 +131,11 @@ async function validateDevice(fingerprint) {
 async function validateTable(project, table) {
     try {
         let tbl = await Table.findOne({ where: { tbl_name: table, project_id: project } });
+        if (tbl == null || tbl == undefined || tbl.length == 0) {
+            console.log('Table not found')
+            return false;
+        }
+
         return tbl ? tbl.tbl_id : false;
     } catch (error) {
         console.error('Error checking table:', error);
