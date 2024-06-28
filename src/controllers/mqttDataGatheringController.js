@@ -85,7 +85,14 @@ async function insertData(requestData) {
         insertData += values;
 
         await sequelize.query(insertData);
-        return { message: 'Data inserted successfully' };
+        return {
+            message: 'Data inserted successfully', status: 200, data: {
+                project_id,
+                device_id,
+                tbl_id,
+                data
+            }
+        };
     } catch (error) {
         throw new Error(`Failed to insert data | ${error.message}`);
     }

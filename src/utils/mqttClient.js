@@ -12,13 +12,25 @@ client.on('connect', () => {
       console.log('Subscribed to topic: project/+/data');
     }
   });
+
+  client.subscribe('projectSuccess/+/data/', (err) => {
+    if (err) {
+      console.error('Failed to subscribe to topic:', err);
+    } else {
+      console.log('Subscribed to topic: projectSuccess/+/data/');
+    }
+  });
 });
+
 
 client.on('message', async (topic, message) => {
   console.log(`Received message from ${topic}: ${message.toString()}`);
 
   const tokens = topic.split('/');
   const projectID = tokens[1];
+  const topicType = tokens[0];
+
+  if (topicType === 'projectSuccess') return console.log('Received message from projectSuccess');
 
   const data = JSON.parse(message.toString());
 
@@ -33,7 +45,18 @@ client.on('message', async (topic, message) => {
   try {
     if (validateFields(requestData)) {
       const result = await mqttDataGatheringController.insertData(requestData);
-      console.log(result);
+
+      console.log('Result:', result);
+      if (result && result.message == 'Data inserted successfully') {
+        publish(`projectSuccess/${projectID}/data/`,
+          // Publish request data
+          JSON.stringify({
+            deviceID: result.device_id,
+            table: result.tbl_id,
+            data: result.data
+          })
+        );
+      }
     } else {
       console.error('Validation failed', requestData);
     }
@@ -41,6 +64,11 @@ client.on('message', async (topic, message) => {
     console.error('Error processing message:', error);
   }
 });
+
+function publish(topic, message) {
+  console.log(`Publishing to ${topic}: ${message}`);
+  client.publish(topic, message);
+}
 
 // check if all required fields are present
 function validateFields(data) {
