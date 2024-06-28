@@ -100,8 +100,8 @@ async function validateProject(project_id, mqtt_key) {
             console.log('Project not found')
             return false;
         } else {
-            if (project.mqtt_key != mqtt_key) {
-                console.log('Invalid Key')
+            if (project.mqtt_key != mqtt_key || project.real_time_enabled == false) {
+                console.log('Invalid Key or Real time not enabled')
                 return false;
             }
         }
