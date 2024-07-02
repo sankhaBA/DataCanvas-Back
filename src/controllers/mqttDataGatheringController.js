@@ -175,7 +175,7 @@ function validateColumnDataType(dataType, data) {
     } else if (dataType == 2) {
         return !isNaN(data);
     } else if (dataType == 3) {
-        return typeof data === 'string';
+        return typeof data == 'string';
     } else if (dataType == 4) {
         return typeof data == 'boolean';
     }
