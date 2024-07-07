@@ -3,7 +3,6 @@ const mqttDataGatheringController = require('../controllers/mqttDataGatheringCon
 
 // const client = mqtt.connect('mqtt://192.248.11.35:1883');
 const client = mqtt.connect('mqtts://broker.emqx.io:8883', 'mqttx_790fvffdfd0c455', { username: 'emqx' });
-y
 client.on('connect', () => {
   client.subscribe('project/+/data', (err) => {
     if (err) {
