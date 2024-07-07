@@ -260,7 +260,11 @@ const getToggleData = async (widget_id, res) => {
 
     const tableName = 'datatable_' + widget.dataset;
 
-    let sql = `SELECT ${configuration.Column.clm_name} FROM "iot-on-earth-public"."${tableName}" WHERE device = ${configuration.device_id} ORDER BY id DESC LIMIT 1`
+    let sql = `SELECT ${configuration.Column.clm_name} FROM "iot-on-earth-public"."${tableName}"`;
+    if (configuration.device_id) {
+      sql += ` WHERE device = ${configuration.device_id}`;
+    }
+    sql += ` ORDER BY id DESC LIMIT 1`;
 
     const data = await sequelize.query(sql);
 
@@ -430,7 +434,12 @@ const getGaugeData = async (widget_id, res) => {
     }
 
     const tableName = `"iot-on-earth-public".datatable_${widget.dataset}`;
-    const query = `SELECT ${configuration.Column.clm_name} FROM ${tableName} WHERE device = ${configuration.device_id} ORDER BY id DESC LIMIT 1`;
+    let query = `SELECT ${configuration.Column.clm_name} FROM ${tableName}`;
+    if (configuration.device_id) {
+      query += ` WHERE device = ${configuration.device_id}`;
+    }
+    query += ` ORDER BY id DESC LIMIT 1`;
+
     const result = await sequelize.query(query);
 
     if (result[0][0][configuration.Column.clm_name]) {

@@ -139,7 +139,7 @@ async function deleteAllDevicesByProjectId(project_id, res) {
 // Genrate fingerprint
 async function generateFingerprint() {
     let fingerprint = "";
-    let deviceWithSameFingerprint;
+    let deviceWithSameFingerprint = false;
 
     const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 

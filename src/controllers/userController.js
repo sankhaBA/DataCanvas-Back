@@ -13,7 +13,7 @@ async function login(email, res) {
     }
 
     if (user) {
-      const token = jwt.sign(user, 'secret', { expiresIn: '1h' });
+      const token = jwt.sign(user, 'secret', { expiresIn: '7d' });
 
       res.status(200).json({ token, user });
     } else {
